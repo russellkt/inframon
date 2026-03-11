@@ -18,6 +18,8 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - ZABBIX_API_URL=${ZABBIX_API_URL}
       - ZABBIX_API_TOKEN=${ZABBIX_API_TOKEN}
+      - OPENAI_API_KEY=not-needed
+      - OLLAMA_BASE_URL=http://10.10.1.149:11434
       - OPENFANG_HOME=/data
       - RUST_LOG=info
     volumes:

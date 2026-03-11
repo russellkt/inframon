@@ -4,10 +4,12 @@
 # API server settings
 # api_key = ""                               # Set to enable Bearer auth (recommended for production)
 api_listen = "0.0.0.0:50051"                 # Bind to all interfaces for Docker
-# Auto-approve shell commands that match the agent's allowlist
-# (require_approval = false disables the approval gate entirely — safe because
-#  the agent's [capabilities].shell allowlist still restricts which commands run)
+# Disable approval gate for shell_exec — agent's [capabilities].shell
+# allowlist still restricts which commands can run.
+[approval]
 require_approval = false
+auto_approve = true
+timeout_secs = 10
 
 [default_model]
 provider = "openrouter"
