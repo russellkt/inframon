@@ -20,6 +20,14 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 # Ensure openfang and uv are on PATH
 ENV PATH="/root/.openfang/bin:/root/.local/bin:${PATH}"
 
+# Pre-install MCP server dependencies for fast startup
+COPY mcp-servers/juniper /tmp/mcp-juniper
+RUN cd /tmp/mcp-juniper && uv sync && rm -rf /tmp/mcp-juniper
+COPY mcp-servers/zabbix /tmp/mcp-zabbix
+RUN cd /tmp/mcp-zabbix && uv sync && rm -rf /tmp/mcp-zabbix
+COPY mcp-servers/proxmox /tmp/mcp-proxmox
+RUN cd /tmp/mcp-proxmox && uv sync && rm -rf /tmp/mcp-proxmox
+
 # Download built-in agent templates for reference
 RUN mkdir -p /opt/openfang \
     && curl -fsSL https://github.com/RightNow-AI/openfang/archive/refs/heads/main.tar.gz \

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-juniper"
+version = "0.1.0"
+description = "Juniper EX switch MCP server for infrastructure monitoring"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=2.0",
+    "junos-eznc>=2.7",
+]
+
+[project.scripts]
+mcp-juniper = "mcp_juniper.server:main"

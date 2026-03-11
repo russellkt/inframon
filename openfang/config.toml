@@ -30,10 +30,28 @@ listen_addr = "0.0.0.0:50051"
 
 # ── MCP Servers ─────────────────────────────────────────────────────
 [[mcp_servers]]
-name = "fetch"
+name = "juniper"
 timeout_secs = 30
 
 [mcp_servers.transport]
 type = "stdio"
 command = "uvx"
-args = ["mcp-server-fetch"]
+args = ["--directory", "/usr/local/share/inframon/mcp-servers/juniper", "mcp-juniper"]
+
+[[mcp_servers]]
+name = "zabbix"
+timeout_secs = 30
+
+[mcp_servers.transport]
+type = "stdio"
+command = "uvx"
+args = ["--directory", "/usr/local/share/inframon/mcp-servers/zabbix", "mcp-zabbix"]
+
+[[mcp_servers]]
+name = "proxmox"
+timeout_secs = 30
+
+[mcp_servers.transport]
+type = "stdio"
+command = "uvx"
+args = ["--directory", "/usr/local/share/inframon/mcp-servers/proxmox", "mcp-proxmox"]

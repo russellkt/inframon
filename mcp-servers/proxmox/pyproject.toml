@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-proxmox"
+version = "0.1.0"
+description = "Proxmox VE cluster MCP server for infrastructure monitoring"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=2.0",
+    "proxmoxer>=2.0",
+    "requests",
+]
+
+[project.scripts]
+mcp-proxmox = "mcp_proxmox.server:main"

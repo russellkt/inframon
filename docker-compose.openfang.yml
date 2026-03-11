@@ -33,6 +33,7 @@ services:
       - ./openfang/config.toml:/data/config.toml
       - ./openfang/agents:/data/agents:ro
       - ./openfang/scripts:/usr/local/share/inframon/scripts:ro
+      - ./mcp-servers:/usr/local/share/inframon/mcp-servers:ro
       # Persistent data (SQLite DB, memory, sessions)
       - ./openfang/data:/data/data
       # SSH key for Proxmox/switch access (dedicated key — NOT personal keys)
