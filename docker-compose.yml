@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  inframon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bmic-inframon
+    ports:
+      - "3000:3000"
+    environment:
+      - ZABBIX_API_URL=${ZABBIX_API_URL}
+      - ZABBIX_API_TOKEN=${ZABBIX_API_TOKEN}
+      - PROXMOX_HOST=${PROXMOX_HOST}
+      - PROXMOX_USER=${PROXMOX_USER}
+      - PROXMOX_TOKEN_ID=${PROXMOX_TOKEN_ID}
+      - PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET}
+      - PROXMOX_VERIFY_SSL=${PROXMOX_VERIFY_SSL:-false}
+      - PORT=3000
+      - NODE_ENV=${NODE_ENV:-production}
+      - PI_MODEL=${PI_MODEL:-claude-opus-4-6}
+    volumes:
+      - ./logs:/app/logs
+      - ./state:/app/.pi/state
+    networks:
+      - bmic-infra
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  bmic-infra:
+    driver: bridge
