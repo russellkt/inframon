@@ -57,7 +57,7 @@ When you receive a webhook alert, it contains: host, severity, event_id, trigger
 
 **Step 3 — Investigate with appropriate tool:**
 - Proxmox host → use Proxmox REST API (node status, cluster health)
-- Network device → use Zabbix `item.get`/`history.get` (interface status, traffic data already collected via SNMP)
+- Network device → use Juniper REST API for real-time state + Zabbix `item.get`/`history.get` for historical SNMP data
 - Storage → use Proxmox API + zpool commands
 
 **Step 4 — Triage and act:**
@@ -111,8 +111,33 @@ python3 /usr/local/share/inframon/scripts/proxmox-api.py zpool-status
 python3 /usr/local/share/inframon/scripts/proxmox-api.py zpool-list
 ```
 
-### 3. SSH — LAST RESORT
-Only use SSH when no API alternative exists. Currently the only valid SSH use is ZFS queries via proxmox-api.py (handled automatically). Do NOT SSH to switches — use Zabbix item.get instead.
+### 3. Juniper Switch REST API — REAL-TIME SWITCH DATA
+Query Juniper EX switches directly via their built-in REST API for real-time data during investigations. Use this instead of Zabbix item.get when you need current state (not historical SNMP polls).
+
+**Usage:**
+```
+python3 /usr/local/share/inframon/scripts/juniper-api.py <host> <rpc> [param=value]
+```
+
+**Host aliases:** ex3400 (10.10.1.10), ex2300 (10.10.1.9)
+
+**Common queries:**
+```
+python3 /usr/local/share/inframon/scripts/juniper-api.py ex3400 get-interface-information
+python3 /usr/local/share/inframon/scripts/juniper-api.py ex3400 get-interface-information interface-name=ge-0/0/0
+python3 /usr/local/share/inframon/scripts/juniper-api.py ex2300 get-alarm-information
+python3 /usr/local/share/inframon/scripts/juniper-api.py ex3400 get-lldp-neighbors-information
+python3 /usr/local/share/inframon/scripts/juniper-api.py ex3400 get-environment-information
+python3 /usr/local/share/inframon/scripts/juniper-api.py ex3400 get-ethernet-switching-table-information
+python3 /usr/local/share/inframon/scripts/juniper-api.py ex3400 get-chassis-inventory
+```
+
+**When to use Juniper API vs Zabbix:**
+- **Juniper API:** Current interface state, real-time alarms, LLDP neighbors, MAC table, chassis health — use during active investigation
+- **Zabbix item.get/history.get:** Historical trends, traffic graphs, SNMP-polled metrics over time — use for context and baselines
+
+### 4. SSH — LAST RESORT
+Only use SSH when no API alternative exists. Currently the only valid SSH use is ZFS queries via proxmox-api.py (handled automatically). Do NOT SSH to switches — use Juniper REST API for real-time data or Zabbix item.get for historical data.
 
 ### Knowledge Store (ak CLI)
 ```
@@ -158,8 +183,8 @@ Recipient: krussell1@baldwinmutual.com
 ### Network Switches
 | Switch | IP | Model | Access |
 |--------|-----|-------|--------|
-| bmic-ex3400-1 | 10.10.1.10 | Juniper EX3400-48P | Zabbix SNMP (hostid 10595) |
-| bmic-ex2300-1 | 10.10.1.9 | Juniper EX2300-C-12P | Zabbix SNMP (hostid 10594) |
+| bmic-ex3400-1 | 10.10.1.10 | Juniper EX3400-48P | REST API (port 8080) + Zabbix SNMP (hostid 10595) |
+| bmic-ex2300-1 | 10.10.1.9 | Juniper EX2300-C-12P | REST API (port 8080) + Zabbix SNMP (hostid 10594) |
 | bmic-icx6610-1 | 10.10.1.254 | Brocade ICX6610-48P | Zabbix SNMP (hostid 10585) |
 
 ### PBS Instances
@@ -193,7 +218,8 @@ Query Zabbix API: problem details, host items, recent history
     v
 Investigate with API tools:
   - Proxmox REST API: node health, cluster status, VM state
-  - Zabbix item.get: switch interfaces, device metrics (via SNMP data)
+  - Juniper REST API: real-time switch state (interfaces, alarms, LLDP)
+  - Zabbix item.get: switch metrics history, device metrics (via SNMP data)
   - Zabbix history.get: trends, recent values
   - ZFS: zpool status via proxmox-api.py SSH fallback
     |
