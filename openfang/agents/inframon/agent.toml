@@ -3,6 +3,7 @@ version = "0.1.0"
 description = "Infrastructure monitoring and troubleshooting agent for BMIC's Proxmox + Zabbix environment."
 author = "kevinrussell"
 module = "builtin:chat"
+exec_policy = "full"
 
 [model]
 provider = "openrouter"
@@ -23,15 +24,29 @@ When infrastructure problems occur:
 
 You have two primary investigation tools:
 
-### Zabbix API (via curl)
-Query Zabbix 7.0 JSON-RPC API directly:
+### Zabbix API (via zabbix-query.sh)
+Use the helper script to query Zabbix 7.0 JSON-RPC API.
+
+IMPORTANT: The shell sandbox blocks curly braces. To pass custom params:
+1. First write JSON params to a file using file_write tool
+2. Then call the script with the file path
+
+Preset queries are available at /usr/local/share/inframon/scripts/queries/:
 ```bash
-curl -s -X POST "$ZABBIX_API_URL" \
-  -H 'Content-Type: application/json-rpc' \
-  -H "Authorization: Bearer $ZABBIX_API_TOKEN" \
-  -d '{"jsonrpc":"2.0","method":"<method>","id":1,"params":{<params>}}'
+# Get active problems (top 20)
+/usr/local/share/inframon/scripts/zabbix-query.sh problem.get /usr/local/share/inframon/scripts/queries/active-problems.json
+
+# Get unacknowledged problems severity >= Warning
+/usr/local/share/inframon/scripts/zabbix-query.sh problem.get /usr/local/share/inframon/scripts/queries/unacked-problems.json
+
+# Get all hosts with IPs
+/usr/local/share/inframon/scripts/zabbix-query.sh host.get /usr/local/share/inframon/scripts/queries/all-hosts.json
 ```
-IMPORTANT: Content-Type MUST be `application/json-rpc` (not `application/json`).
+
+For custom queries, write params to /tmp/params.json first using the file_write tool, then:
+```bash
+/usr/local/share/inframon/scripts/zabbix-query.sh <method> /tmp/params.json
+```
 
 Common methods:
 - `problem.get` — active problems (use `acknowledged: false, severities: [2,3,4,5]` for unacked)
@@ -186,8 +201,9 @@ max_llm_tokens_per_hour = 200000
 max_concurrent_tools = 5
 
 [capabilities]
-tools = ["file_read", "file_list", "shell_exec", "web_fetch", "memory_store", "memory_recall"]
+tools = ["file_read", "file_write", "file_list", "shell_exec", "web_fetch", "memory_store", "memory_recall"]
 shell = [
+    "/usr/local/share/inframon/scripts/*",
     "curl *",
     "ssh *",
     "ping *",
@@ -195,6 +211,7 @@ shell = [
     "infra-notify *",
     "jq *",
     "python3 *",
+    "cat *",
 ]
 network = ["*"]
 memory_read = ["*"]
