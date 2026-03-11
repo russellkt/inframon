@@ -1,0 +1,44 @@
+# OpenFang Agent OS — Custom Dockerfile for Inframon
+# Extends the OpenFang build with infrastructure tools (SSH, curl, ak CLI)
+
+# ── Stage 1: Build OpenFang from source ──────────────────────────────
+FROM rust:1-slim-bookworm AS builder
+WORKDIR /build
+
+RUN apt-get update && apt-get install -y \
+    pkg-config libssl-dev git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone and build OpenFang
+RUN git clone --depth 1 https://github.com/RightNow-AI/openfang.git . \
+    && cargo build --release --bin openfang
+
+# ── Stage 2: Runtime with infrastructure tools ───────────────────────
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
+    openssh-client \
+    jq \
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy OpenFang binary and built-in agents
+COPY --from=builder /build/target/release/openfang /usr/local/bin/
+COPY --from=builder /build/agents /opt/openfang/agents
+
+# SSH config: disable strict host key checking for infrastructure hosts
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh \
+    && echo "Host 10.10.1.*\n  StrictHostKeyChecking no\n  UserKnownHostsFile /dev/null\n  LogLevel ERROR" \
+    > /root/.ssh/config \
+    && chmod 600 /root/.ssh/config
+
+# Data directory for OpenFang state
+VOLUME /data
+ENV OPENFANG_HOME=/data
+
+EXPOSE 4200 8080
+
+ENTRYPOINT ["openfang"]
+CMD ["start"]

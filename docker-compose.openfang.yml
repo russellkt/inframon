@@ -1,0 +1,47 @@
+# OpenFang Agent OS — Docker Compose for BMIC Inframon
+# Runs alongside existing docker-compose.yml (no disruption)
+#
+# Usage:
+#   docker compose -f docker-compose.openfang.yml up -d
+#   docker compose -f docker-compose.openfang.yml logs -f
+
+services:
+  inframon:
+    build:
+      context: .
+      dockerfile: Dockerfile.openfang
+    container_name: bmic-inframon-openfang
+    ports:
+      - "4200:4200"   # Dashboard + API
+      - "8080:8080"   # Webhook gateway (for Zabbix push alerts)
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - ZABBIX_API_URL=${ZABBIX_API_URL}
+      - ZABBIX_API_TOKEN=${ZABBIX_API_TOKEN}
+      - OPENFANG_HOME=/data
+      - RUST_LOG=info
+    volumes:
+      # OpenFang config and agents
+      - ./openfang/config.toml:/data/config.toml:ro
+      - ./openfang/agents:/data/agents:ro
+      # Persistent data (SQLite DB, memory, sessions)
+      - ./openfang/data:/data/data
+      # SSH key for Proxmox/switch access (dedicated key — NOT personal keys)
+      - ${INFRAMON_SSH_KEY:-./openfang/ssh/id_ed25519}:/root/.ssh/id_ed25519:ro
+      - ${INFRAMON_SSH_KEY:-./openfang/ssh/id_ed25519}.pub:/root/.ssh/id_ed25519.pub:ro
+    networks:
+      - bmic-infra
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4200/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+networks:
+  bmic-infra:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.100.0/24

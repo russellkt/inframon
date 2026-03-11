@@ -1,0 +1,56 @@
+# OpenFang Agent OS — Inframon Configuration
+# BMIC Infrastructure Monitoring & Troubleshooting
+
+# API server settings
+# api_key = ""                               # Set to enable Bearer auth (recommended for production)
+# api_listen = "0.0.0.0:4200"               # Bind to all interfaces for Docker
+
+[default_model]
+provider = "openrouter"
+model = "google/gemini-2.5-flash"
+api_key_env = "OPENROUTER_API_KEY"
+base_url = "https://openrouter.ai/api/v1"
+
+[memory]
+decay_rate = 0.05
+# sqlite_path = "/data/openfang.db"          # Docker volume path
+
+[network]
+listen_addr = "0.0.0.0:4200"
+
+# Session compaction
+[compaction]
+threshold = 80
+keep_recent = 20
+max_summary_tokens = 1024
+
+# Usage tracking — show full cost breakdown
+usage_footer = "Full"
+
+# ── Model Fallback Chain ─────────────────────────────────────────────
+# OpenFang supports fallback models per-agent (see agent.toml [model.fallback])
+# and intelligent routing via provider configuration.
+#
+# Provider priority for inframon:
+#   1. OpenRouter → google/gemini-2.5-flash (primary, fast, cheap)
+#   2. Ollama → local models on 10.10.1.149 (free, private, higher latency)
+#   3. OpenRouter → anthropic/claude-sonnet-4-20250514 (fallback for complex tasks)
+
+# ── Channel Adapters ─────────────────────────────────────────────────
+
+# Google Chat (Phase 2 — requires Google Cloud project + service account)
+# [google_chat]
+# service_account_key_env = "GOOGLE_CHAT_SA_KEY"
+# space_ids = []                              # Empty = respond in any space
+
+# Slack (alternative if Google Chat setup is delayed)
+# [slack]
+# bot_token_env = "SLACK_BOT_TOKEN"
+# app_token_env = "SLACK_APP_TOKEN"
+
+# ── MCP Server Connections ───────────────────────────────────────────
+# Future: expose inframon tools to Claude Code / other agents
+# [[mcp_servers]]
+# name = "inframon"
+# command = "openfang"
+# args = ["mcp", "serve"]

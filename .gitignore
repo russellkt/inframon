@@ -15,3 +15,7 @@ state/
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+
+# OpenFang
+openfang/data/
+openfang/ssh/
