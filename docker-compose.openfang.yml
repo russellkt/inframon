@@ -27,9 +27,8 @@ services:
       # Persistent data (SQLite DB, memory, sessions)
       - ./openfang/data:/data/data
       # SSH key for Proxmox/switch access (dedicated key — NOT personal keys)
-      # Comment out until key is generated:
-      # - ${INFRAMON_SSH_KEY:-./openfang/ssh/id_ed25519}:/root/.ssh/id_ed25519:ro
-      # - ${INFRAMON_SSH_KEY:-./openfang/ssh/id_ed25519}.pub:/root/.ssh/id_ed25519.pub:ro
+      - ./openfang/ssh/id_ed25519:/root/.ssh/id_ed25519:ro
+      - ./openfang/ssh/id_ed25519.pub:/root/.ssh/id_ed25519.pub:ro
     networks:
       - bmic-infra
     restart: unless-stopped
