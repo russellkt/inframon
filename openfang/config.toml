@@ -10,6 +10,11 @@ default_agent = "inframon"
 listen_port = 8460
 secret_env = "WEBHOOK_SECRET"
 
+[channels.telegram]
+bot_token_env = "TELEGRAM_BOT_TOKEN"
+default_agent = "inframon"
+allowed_users = ["8731968499"]
+
 [compaction]
 keep_recent = 20
 max_summary_tokens = 1024

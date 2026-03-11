@@ -19,3 +19,4 @@ state/
 # OpenFang
 openfang/data/
 openfang/ssh/
+openfang/google-chat-sa.json
