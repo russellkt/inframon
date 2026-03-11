@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "inframon",
+  "project_id": "466a696f-2114-4542-9463-3d7cf5d6d471"
+}
