@@ -11,12 +11,14 @@ import {
   SettingsStore,
   CustomProvidersStore,
   setAppStorage,
+  SessionListDialog,
 } from "@mariozechner/pi-web-ui";
 import { html, render } from "lit";
 import { Plus, Settings, Clock } from "lucide";
 import { Button } from "@mariozechner/mini-lit/dist/Button.js";
 import "./app.css";
 import { icon } from "@mariozechner/mini-lit";
+import { zabbixTool, proxmoxTool } from "./tools";
 
 // Create stores
 const settings = new SettingsStore();
@@ -132,14 +134,20 @@ const createAgent = async (initialState?: any) => {
     initialState: initialState || {
       systemPrompt: `You are inframon, an infrastructure troubleshooting agent for BMIC's Zabbix + Proxmox environment.
 
+## Available Tools
+- **zabbix**: Query Zabbix API for problems, events, hosts, and historical data
+- **proxmox**: Get Proxmox cluster nodes and their health status
+
 When an operator describes an infrastructure problem:
-1. Ask clarifying questions if needed
-2. Use your available skills to investigate
-3. Provide clear findings and recommendations
+1. Use the zabbix tool to query for alert details, historical trends, and related events
+2. Use the proxmox tool to check host health, resource usage, and cluster status
+3. Provide clear findings and recommendations based on the data
 4. Be ready to execute approved remediation steps
 
-Be concise and actionable.`,
-      model: getModel("anthropic", "claude-opus-4-6"),
+Be concise and actionable. Explain what data you're checking and why.
+
+**Note:** Configure your AI provider in Settings (⚙️) before starting.`,
+      model: undefined,
       thinkingLevel: "off",
       messages: [],
       tools: [],
@@ -171,6 +179,7 @@ Be concise and actionable.`,
     onApiKeyRequired: async (provider: string) => {
       return await ApiKeyPromptDialog.prompt(provider);
     },
+    toolsFactory: (_agent) => [zabbixTool, proxmoxTool],
   });
 };
 
@@ -180,16 +189,53 @@ const newSession = () => {
   window.location.href = url.toString();
 };
 
+const openSessionHistory = async () => {
+  try {
+    const selected = await SessionListDialog.show(sessions);
+    if (selected) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("session", selected);
+      window.location.href = url.toString();
+    }
+  } catch (err) {
+    console.error("Failed to open session history:", err);
+  }
+};
+
 const renderApp = () => {
   const app = document.getElementById("app");
   if (!app) return;
 
+  // Get URL params for alert context
+  const urlParams = new URLSearchParams(window.location.search);
+  const alertId = urlParams.get("alert_id");
+  const host = urlParams.get("host");
+  const problem = urlParams.get("problem");
+
+  // Build alert banner HTML
+  const alertBanner = alertId
+    ? html`<div class="bg-yellow-900 bg-opacity-20 border-b border-yellow-700 px-4 py-2 text-sm text-yellow-200">
+        <span class="font-semibold">Alert:</span> ${host} — ${problem}
+        <span class="text-xs text-yellow-300 ml-2">(ID: ${alertId})</span>
+      </div>`
+    : html``;
+
   const appHtml = html`
     <div class="w-full h-screen flex flex-col bg-background text-foreground overflow-hidden">
+      <!-- Alert Banner (if active) -->
+      ${alertBanner}
+
       <!-- Header -->
       <div class="flex items-center justify-between border-b border-border shrink-0 px-4 py-3">
         <div class="text-xl font-semibold">Inframon</div>
         <div class="flex items-center gap-2">
+          ${Button({
+            variant: "ghost",
+            size: "sm",
+            children: icon(Clock, "sm"),
+            onClick: openSessionHistory,
+            title: "Session History",
+          })}
           ${Button({
             variant: "ghost",
             size: "sm",
@@ -239,7 +285,7 @@ async function initApp() {
   if (alertId && host && problem) {
     agent.steer({
       role: "user",
-      content: `Alert: ${host} - ${problem} (ID: ${alertId})`,
+      content: `Alert: ${host} — ${problem} (ID: ${alertId}). Please investigate and report your initial findings.`,
     });
   }
 

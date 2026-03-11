@@ -7,18 +7,18 @@ services:
       dockerfile: Dockerfile
     container_name: bmic-inframon
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Web UI
+      - "3001:3001"  # API proxy (Zabbix, Proxmox)
     environment:
+      # Zabbix API configuration
       - ZABBIX_API_URL=${ZABBIX_API_URL}
       - ZABBIX_API_TOKEN=${ZABBIX_API_TOKEN}
-      - PROXMOX_HOST=${PROXMOX_HOST}
-      - PROXMOX_USER=${PROXMOX_USER}
-      - PROXMOX_TOKEN_ID=${PROXMOX_TOKEN_ID}
-      - PROXMOX_TOKEN_SECRET=${PROXMOX_TOKEN_SECRET}
-      - PROXMOX_VERIFY_SSL=${PROXMOX_VERIFY_SSL:-false}
+      # LLM configuration
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      # Web UI ports
       - PORT=3000
+      - PORT_API=3001
       - NODE_ENV=${NODE_ENV:-production}
-      - PI_MODEL=${PI_MODEL:-claude-opus-4-6}
     volumes:
       - ./logs:/app/logs
       - ./state:/app/.pi/state
@@ -26,7 +26,7 @@ services:
       - bmic-infra
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -35,3 +35,7 @@ services:
 networks:
   bmic-infra:
     driver: bridge
+
+# Note: Zabbix polling runs externally on macOS via launchd
+# (poll_zabbix.py in ~/git/bmic-proxmox/scripts/infra-monitor/)
+# The Docker container provides the web UI and API proxy only.

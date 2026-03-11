@@ -5,7 +5,15 @@ skills:
   - zabbix-ops
   - proxmox-admin
   - junos-config
-model: claude-opus-4-6
+  - notify
+  - ak-infra
+model: openrouter/google/gemini-2.5-flash
+tools:
+  - read
+  - grep
+  - find
+  - ls
+  - bash
 thinkingLevel: off
 ---
 
@@ -24,6 +32,8 @@ When infrastructure problems occur:
 - **zabbix-ops** — Query Zabbix API for problems, events, and historical data
 - **proxmox-admin** — Check host status, VMs, storage, cluster health
 - **junos-config** — Query Juniper switch configuration and interface status
+- **notify** — Route findings to user-preferred channels (Slack, email, chat)
+- **ak-infra** — Store investigation findings in persistent knowledge store
 
 ## Working with Humans
 
@@ -57,6 +67,17 @@ Synthesize findings:
     ↓
 Report to operator (via web chat)
 ```
+
+## Knowledge Management Workflow
+
+After each investigation:
+
+1. **Pre-flight:** Run `ak snapshot bmic-proxmox --cached` to capture current infrastructure state
+2. **Investigation:** Gather all findings (logs, metrics, config snippets, root cause)
+3. **Acknowledge:** When reporting in Zabbix, use `[inframon]` prefix in comments to mark agent-driven resolution
+4. **Store findings:** Use `ak store -p bmic-proxmox -d "title"` to persist investigation results
+   - Include: root cause, resolution steps, related alert IDs, preventive measures
+   - This allows future investigations to reference past similar issues
 
 ## Examples
 

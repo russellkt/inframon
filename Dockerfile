@@ -2,37 +2,38 @@ FROM node:20-slim
 
 WORKDIR /app
 
-# Install pi globally and pm2 for process management
-RUN npm install -g @mariozechner/pi pm2
+# Install pi globally, pm2 for process management, and curl for healthcheck
+RUN npm install -g @mariozechner/pi pm2 && apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package.json package-lock.json* ./
+COPY tsconfig.server.json ./
 
 # Install dependencies
 RUN npm ci
 
-# Copy web-ui app
+# Copy web-ui app and build it
 COPY web-ui-app ./web-ui-app
 WORKDIR /app/web-ui-app
 RUN npm ci && npm run build
 WORKDIR /app
 
-# Copy pi agent configuration
-COPY .pi/ ~/.pi/
+# Copy pi agent configuration (to /root/.pi for root user)
+COPY .pi/ /root/.pi/
 
-# Copy source code
+# Copy source code and build the Express server
 COPY src/ ./src/
+RUN npm run build:server
+
+# Copy pm2 config
 COPY pm2.config.js .
 
-# Build web-ui
-RUN npm run build
-
-# Expose port
-EXPOSE 3000
+# Expose ports (3000 for web-ui, 3001 for API)
+EXPOSE 3000 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+  CMD curl -f http://localhost:3001/health || exit 1
 
-# Run both agent and web-ui
+# Run both API server and web-ui
 CMD ["pm2-runtime", "start", "pm2.config.js"]

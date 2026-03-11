@@ -1,22 +1,19 @@
 export default {
   apps: [
     {
-      name: "inframon-agent",
-      script: "pi",
-      args: 'daemon --agent inframon --poll-interval 300',
+      name: "inframon-api",
+      script: "node",
+      args: "dist/server.js",
       exec_mode: "fork",
       env: {
-        ZABBIX_API_TOKEN: process.env.ZABBIX_API_TOKEN,
+        PORT_API: "3001",
         ZABBIX_API_URL: process.env.ZABBIX_API_URL,
-        PROXMOX_HOST: process.env.PROXMOX_HOST,
-        PROXMOX_USER: process.env.PROXMOX_USER,
-        PROXMOX_TOKEN_ID: process.env.PROXMOX_TOKEN_ID,
-        PROXMOX_TOKEN_SECRET: process.env.PROXMOX_TOKEN_SECRET,
-        PROXMOX_VERIFY_SSL: process.env.PROXMOX_VERIFY_SSL || "false",
+        ZABBIX_API_TOKEN: process.env.ZABBIX_API_TOKEN,
+        OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
         NODE_ENV: process.env.NODE_ENV || "production",
       },
-      error_file: "./logs/inframon-agent.error.log",
-      out_file: "./logs/inframon-agent.out.log",
+      error_file: "./logs/api.error.log",
+      out_file: "./logs/api.out.log",
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
     },
     {

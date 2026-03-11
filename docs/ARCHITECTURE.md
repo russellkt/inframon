@@ -7,315 +7,252 @@
 │                     Zabbix Server                       │
 │   - Collects metrics from hosts                        │
 │   - Detects problems via triggers                      │
-│   - Exposes API for querying                           │
-└────────────────┬────────────────────────────────────────┘
-                 │ (poll every 5m)
-                 ↓
-┌─────────────────────────────────────────────────────────┐
-│              Inframon Agent (pi-based)                  │
-│                                                         │
-│  - Polls Zabbix for unacknowledged problems           │
-│  - Generates notifications                             │
-│  - Provides investigation via skills                   │
-│  - Persists alert history in ak                        │
-└────────────────┬────────────────────────────────────────┘
-                 │
-         ┌───────┴──────────┐
-         ↓                  ↓
-    ┌─────────────┐  ┌───────────────┐
-    │   Slack     │  │   Email       │
-    │ Notification│  │ Notification  │
-    └─────────────┘  └───────────────┘
-         │                  │
-         │   (contains       │   (contains
-         │    web link)      │    web link)
-         │                  │
-         └──────────┬───────┘
-                    ↓
+│   - Exposes JSON-RPC API                              │
+└────────┬───────────────────────────────────────────────┘
+         │ (problem.get)
+         │
+    ┌────┴──────────────────────────────────────────────────┐
+    │         EXTERNAL POLLING (macOS launchd)               │
+    │  ~/git/bmic-proxmox/scripts/infra-monitor/            │
+    │     poll_zabbix.py (runs every 5 minutes)             │
+    │     - Queries unacknowledged problems                  │
+    │     - Generates Investigate URLs                       │
+    │     - Sends notifications with links                   │
+    └────┬──────────────────────────────────────────────────┘
+         │
+         └──────────────┬──────────────────┐
+                        ↓                  ↓
+                   ┌─────────┐       ┌───────────┐
+                   │  Slack  │       │  Email    │
+                   │  notify │       │  notify   │
+                   └────┬────┘       └─────┬─────┘
+                        │                  │
+                        └─────────┬────────┘
+                                  │
+         (Click Investigate link)  │
+                                  ↓
     http://localhost:3000?alert_id=123&host=ex3400
-                    │
-                    ↓
-    ┌─────────────────────────────────────────────────────┐
-    │           Web UI (pi-web-ui ChatPanel)              │
-    │                                                     │
-    │  - Renders alert context in chat                   │
-    │  - Streams agent investigation                     │
-    │  - Session storage (IndexedDB)                     │
-    │  - Human approval for remediation                  │
-    └────────────┬────────────────────────────────────────┘
-                 │
-         ┌───────┴──────────┐
-         ↓                  ↓
-    ┌─────────────┐  ┌───────────────┐
-    │  Proxmox    │  │   Zabbix      │
-    │  APIs       │  │   APIs        │
-    │  (VM status)│  │  (Acknowledge)│
-    └─────────────┘  └───────────────┘
+                                  │
+                        ┌─────────┴────────────┐
+                        ↓                      ↓
+    ┌─────────────────────────────┐  ┌──────────────────────┐
+    │  Web UI Container (Docker)  │  │ Express API Proxy    │
+    │                             │  │ (localhost:3001)     │
+    │  - ChatPanel (pi-web-ui)    │  │                      │
+    │  - Custom tools:            │  │ Routes:              │
+    │    * zabbixTool             │  │  POST /api/zabbix    │
+    │    * proxmoxTool            │  │  GET  /api/proxmox   │
+    │  - Session storage (IDB)    │  │  GET  /health        │
+    │  - Model configuration      │  │                      │
+    └──────────┬──────────────────┘  └──────────┬───────────┘
+               │                                 │
+               └────────────┬────────────────────┘
+                            │
+                  ┌─────────┴──────────┐
+                  ↓                    ↓
+             ┌──────────┐        ┌──────────┐
+             │ Zabbix   │        │ Proxmox  │
+             │ API      │        │ Cluster  │
+             │ (10.x)   │        │ (SSH)    │
+             └──────────┘        └──────────┘
 ```
 
 ## Components
 
-### 1. Inframon Agent (pi-based)
+### 1. Polling System (External - macOS)
 
-**Purpose:** Monitor Zabbix and investigate problems
+**File:** `~/git/bmic-proxmox/scripts/infra-monitor/poll_zabbix.py`
 
 **Process:**
-1. Poll Zabbix API every 5 minutes
-2. Query for `problem.get` with unacknowledged severity >= Warning
-3. For each problem:
-   - Generate alert notification with web UI link
-   - Store alert context in ak (agent-knowledge)
-4. Wait for next poll interval
+1. Runs every 5 minutes via launchd (launchctl)
+2. Connects to Zabbix API at `10.10.1.142/api_jsonrpc.php`
+3. Queries `problem.get` for unacknowledged alerts
+4. For each alert:
+   - Constructs `Investigate` URL with alert context:
+     ```
+     http://localhost:3000?alert_id=<eventid>&host=<hostname>&problem=<trigger>
+     ```
+   - Sends notification (Slack/email) containing the URL
+5. Acknowledges in Zabbix with `[inframon]` prefix
+6. Stores findings in ak (agent-knowledge) for persistence
 
-**Skills:**
-- `zabbix-ops` — Query Zabbix API
-- `proxmox-admin` — Query Proxmox cluster
-- `junos-config` — Query Juniper switches
+**Configuration:**
+- `.env` file at `~/.config/infra-monitor/.env`
+- Required vars: `ZABBIX_API_URL`, `ZABBIX_API_TOKEN`, `INFRAMON_WEB_URL`
 
 **Dependencies:**
-- Zabbix API endpoint + token
-- Proxmox API endpoint + token
+- `zabbix-utils` (Python library)
+- SSH access to Proxmox for diagnostics
+- Email/Slack webhook for notifications
 
-### 2. Web UI (pi-web-ui)
+### 2. Express API Proxy (Docker)
 
-**Purpose:** Chat interface for human-in-the-loop investigation
+**File:** `src/server.ts`
+
+**Purpose:** Bridge between web UI and backend APIs (Zabbix, Proxmox)
+
+**Endpoints:**
+- `GET /health` — Health check
+- `POST /api/zabbix` — Proxy JSON-RPC calls to Zabbix
+- `GET /api/proxmox/nodes` — SSH to pve-r720, run `pvesh get /nodes`
+
+**Environment:**
+- `PORT_API=3001` (default)
+- `ZABBIX_API_URL` (e.g., `http://10.10.1.142/api_jsonrpc.php`)
+- `ZABBIX_API_TOKEN`
+
+**Features:**
+- CORS-enabled for local development
+- Bearer token injection for Zabbix
+- SSH-based Proxmox access (no REST API token needed)
+- Error handling with helpful hints
+
+### 3. Web UI (Docker)
+
+**Files:** `web-ui-app/src/`
 
 **Technology:**
 - Lit web components
 - ChatPanel from `@mariozechner/pi-web-ui`
+- Custom tools: `tools.ts`
 - IndexedDB for session persistence
 - Vite for bundling
 
+**Custom Tools:**
+```typescript
+zabbixTool  // POST /api/zabbix with JSON-RPC body
+proxmoxTool // GET  /api/proxmox/nodes
+```
+
 **Features:**
-- Pre-populate alert context from URL params
-- Stream agent responses in real-time
-- Session history
-- Model/API key configuration
+- Pre-populated alert context from URL params
+- Alert banner in header showing active problem
+- Session history (Clock button)
+- Model/API key configuration via Settings
 - Theme toggle
 
 **Entry Points:**
-- `/` — New chat session
+- `/` — New session
 - `/?session=uuid` — Resume session
-- `/?alert_id=123&host=ex3400` — Pre-populated alert
+- `/?alert_id=123&host=ex3400&problem=High+CPU` — Pre-populated investigation
 
-### 3. Alert Context Storage
+### 4. Inframon Agent Definition
 
-**Current:** In-memory per session (IndexedDB)
-**Future:** Persist to ak (agent-knowledge) for cross-session history
+**File:** `.pi/agent/agents/inframon.md`
 
-Each alert stores:
-```typescript
-{
-  alert_id: string,
-  host: string,
-  problem_type: string,
-  severity: string,
-  created_at: timestamp,
-  conversation: AgentMessage[],
-  resolution: string,
-  resolved_at: timestamp,
-}
-```
+**Model:** `openrouter/google/gemini-2.5-flash`
 
-### 4. Integration Points
+**Skills (symlinked from `~/.pi/agent/skills/`):**
+- `zabbix-ops` — Query Zabbix API via skill
+- `proxmox-admin` — Check Proxmox status
+- `junos-config` — Query Juniper switches
+- `notify` — Route findings to channels
+- `ak-infra` — Store in knowledge store
 
-#### Slack/Email Notification
-
-Inframon agent generates links:
-```
-⚠️ EX3400 interface down
-[Troubleshoot] (http://localhost:3000?alert_id=123&host=ex3400&problem=interface-down)
-```
-
-#### Zabbix Acknowledgement
-
-When human confirms resolution via chat:
-```
-Agent: "Should I acknowledge this problem in Zabbix?"
-Human: "Yes"
-Agent: [acknowledges via zabbix-ops skill]
-```
-
-#### Remediation Actions
-
-Examples:
-- Proxmox: Restart VM
-- Juniper: Reset interface
-- Zabbix: Update threshold
-
-**Policy:** Only after explicit human approval
+**Tools:** `read, grep, find, ls, bash`
 
 ## Data Flow
 
-### Alert Detection → Notification
+### Alert Detection to Web UI
 
 ```
-1. inframon polls Zabbix
-2. Finds unacknowledged problem
-3. Constructs notification:
+1. poll_zabbix.py finds unacknowledged problem in Zabbix
+2. Generates URL:
+   http://localhost:3000?alert_id=15493911&host=pve-r720&problem=High+CPU
+3. Sends email/Slack with "Investigate" link
+4. Human clicks link → Web UI loads
+5. ChatPanel pre-populates with:
+   "Alert: pve-r720 — High CPU (ID: 15493911). Please investigate..."
+```
+
+### Investigation via Custom Tools
+
+```
+1. Human asks: "Show me the CPU status"
+2. Web UI agent calls zabbixTool
    {
-     "host": "ex3400",
-     "problem": "interface-down",
-     "severity": "High",
-     "link": "http://localhost:3000?alert_id=123&host=ex3400"
+     "method": "history.get",
+     "params": {"hostid": "10596", "key_": "system.cpu.load"}
    }
-4. Sends via Slack/email
-5. Stores in ak for history
+3. zabbixTool calls POST /api/zabbix (Express proxy)
+4. Proxy injects Bearer token, calls Zabbix
+5. Zabbix returns historical CPU data
+6. Agent streams findings to chat
 ```
 
-### Investigation → Resolution
-
-```
-1. Human clicks link → Web UI loads
-2. Alert context pre-populated in chat
-3. Human: "What's the status?"
-4. Agent:
-   - Queries zabbix-ops for details
-   - Queries proxmox-admin for related issues
-   - Streams findings
-5. Human: "Restart the interface"
-6. Agent: "Acknowledging approval, executing..."
-7. Agent: [uses junos-config to reset interface]
-8. Agent: "Interface restarted. Monitoring for recovery."
-9. Human: "Looks good, thanks"
-10. Session archived in ak
-```
-
-## Skill System
-
-Each skill is a markdown file (`.pi/agent/skills/`) describing available tools:
-
-### zabbix-ops.md
-
-```markdown
-# zabbix-ops
-
-Query Zabbix API...
-
-## Tools
-
-### query-problems
-Get unacknowledged problems...
-```
-
-**Implementation:** Skill definitions reference tools that pi agent core resolves at runtime.
-
-### Adding Custom Skill
-
-1. Create `.pi/agent/skills/my-skill.md`
-2. Define tools and parameters
-3. Reference in `.pi/agent/agents/inframon.md`:
-   ```yaml
-   skills:
-     - zabbix-ops
-     - my-skill
-   ```
-
-## Session Persistence
-
-**Browser Storage:** IndexedDB
-- Survives page refresh
-- Survives browser close
-- Persists across days
-
-**Cloud Storage (Future):** ak (agent-knowledge)
-- Shared across sessions/machines
-- Full-text search
-- Long-term history
-
-**URL State:**
-- Session ID in query param: `?session=uuid`
-- Alert context in query params: `?alert_id=123&host=ex3400`
-- Allows sharing specific investigation
-
-## Error Handling
-
-**Agent Failures:**
-- Skill timeout → retry with backoff
-- Invalid token → notify + stop polling
-- Network error → log + continue next poll
-
-**Web UI Failures:**
-- API key missing → prompt user
-- Session load fails → new blank session
-- Storage quota exceeded → archive old sessions
-
-**Notification Failures:**
-- Slack webhook down → log + retry
-- Email delivery failed → fallback to logs
-
-## Security Considerations
-
-### API Tokens
-
-**In Docker:**
-- Stored in `.env` (mounted volume)
-- Passed via environment variables
-- Never logged or exposed
-
-**In Web UI:**
-- API keys for AI provider (user enters via settings)
-- Stored in IndexedDB (browser local storage)
-- Never sent to backend
-
-### Zabbix/Proxmox Access
-
-- Read-only for investigations (safe)
-- Remediation requires explicit human approval
-- All actions logged for audit
-
-### Network
-
-- Inframon ↔ Zabbix: Internal network (bmic-infra)
-- Web UI ↔ Inframon agent: Local (within container)
-- Web UI → AI APIs: User's API key (direct from browser)
-
-## Deployment Topology
+## Deployment
 
 ### Development
 
 ```
-localhost:3000 (vite dev server)
-    ↓
-pi daemon (polling)
-    ↓
-Zabbix / Proxmox (local IPs)
+Terminal 1: npm run dev:server   # Express proxy on :3001
+Terminal 2: cd web-ui-app && npm run dev  # Web UI on :3000
+
+Configuration: .env in current directory
 ```
 
-### Production (Docker)
+### Docker
 
 ```
-inframon container (Docker)
-    ├─ Web UI (port 3000)
-    └─ Agent daemon (background process)
-        ↓
-    Zabbix / Proxmox (bmic-infra network)
+docker-compose up -d
+
+Services:
+  - Web UI: http://localhost:3000
+  - API Proxy: http://localhost:3001 (internal)
+  - pm2 manages: inframon-api + inframon-web-ui
+
+Polling: Still external via launchd (not in container)
 ```
 
-### Future: Proxmox LXC
+### Production (Proxmox LXC)
 
 ```
-Ubuntu 22.04 LXC container
-    ↓
-Docker daemon
-    ↓
-Inframon container (same as above)
+1. Create Ubuntu 22.04 LXC container on pve-r720
+2. Install Docker + docker-compose
+3. Clone inframon repo, populate .env
+4. docker-compose up -d
+5. Polling via launchd continues on Mac (or move to container)
 ```
 
-## Scaling Considerations
+## Files Reference
 
-**Current:** Single inframon agent, single web UI instance
+| Path | Purpose |
+|------|---------|
+| `pm2.config.js` | Process manager: inframon-api, inframon-web-ui |
+| `src/server.ts` | Express proxy server |
+| `web-ui-app/src/tools.ts` | Custom ChatPanel tools |
+| `web-ui-app/src/main.ts` | Web UI entry point + alert pre-population |
+| `.pi/agent/agents/inframon.md` | Agent definition + system prompt |
+| `.pi/agent/skills/` | Symlinks to ~/.pi/agent/skills/ |
+| `.env.example` | Environment template |
+| `docker-compose.yml` | Service definitions |
+| `Dockerfile` | Container image |
+| `~/git/bmic-proxmox/scripts/infra-monitor/poll_zabbix.py` | External poller |
 
-**Future:**
-- Load balancer for web UI (multiple replicas)
-- Shared session storage (PostgreSQL instead of IndexedDB)
-- Multiple agents for different datacenters
-- Webhook integration (Slack/email sends directly to web UI instead of link)
+## Security
 
-## Related Projects
+### API Tokens
 
-- **bmic-proxmox** — Infrastructure platform
-- **pi-mono** — Agent framework
-- **agent-knowledge (ak)** — Shared history + knowledge store
+- **Zabbix token:** In `.env` (mounted volume in Docker)
+- **OpenRouter API key:** In web UI Settings (IndexedDB, never sent to backend)
+- **Proxmox:** SSH key-based (no REST token needed)
 
-See [SETUP.md](./SETUP.md) for configuration.
+### Network Access
+
+- **Web UI ↔ API Proxy:** localhost (Docker internal)
+- **Polling ↔ Zabbix:** Internal network (10.10.1.142)
+- **Web UI ↔ AI Provider:** Direct from browser (user's API key)
+
+## Error Handling
+
+**Polling Failures:**
+- Zabbix unreachable → log + retry next cycle
+- SSH diagnostics fail → note in triage
+- Notification fails → log to file
+
+**Web UI Failures:**
+- API proxy down → show error in chat
+- Zabbix API returns error → forward error message
+- Session save fails → warn user
+
+See [SETUP.md](./SETUP.md) for configuration and troubleshooting.

@@ -6,8 +6,10 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "pm2-dev pm2.config.js",
-    "build": "npm run build:web-ui",
+    "build": "npm run build:server && npm run build:web-ui",
+    "build:server": "tsc -p tsconfig.server.json",
     "build:web-ui": "cd web-ui-app && npm run build",
+    "dev:server": "tsx watch src/server.ts",
     "preview": "cd web-ui-app && npm run preview",
     "start": "pm2-runtime start pm2.config.js",
     "logs": "pm2 logs",
@@ -15,13 +17,19 @@
     "restart": "pm2 restart all"
   },
   "dependencies": {
-    "@mariozechner/pi-ai": "^0.57.1",
     "@mariozechner/pi-agent-core": "^0.57.1",
+    "@mariozechner/pi-ai": "^0.57.1",
     "@mariozechner/pi-tui": "^0.57.1",
-    "@mariozechner/pi-web-ui": "^0.57.1"
+    "@mariozechner/pi-web-ui": "^0.57.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^20.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.3"
   }
 }
