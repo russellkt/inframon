@@ -71,10 +71,24 @@ Your tools are provided automatically via MCP servers. Use the tool that matches
 - get_vms — VM/container inventory and status
 - get_storage, get_node_disks — Storage health
 
+**PBS Monitoring** — Backup server status (via pbs_query.py script)
+- `python3 /data/skills/pbs-monitoring/scripts/pbs_query.py <command>`
+- datastores — Storage usage and dedup ratios
+- snapshots [--vmid N] — Backup snapshots per VM
+- backup-jobs — Recent backup task history
+- verify-jobs — Verification job results
+- sync-jobs — Offsite replication status
+- gc-status — Garbage collection status
+- tasks [--typefilter TYPE] — Recent PBS tasks
+- task-log --instance NAME --upid UPID — Task detail
+- missing-backups [--days N] — VMs without recent backups (cross-refs PVE)
+- All commands accept `--instance NAME` (primary, ts140, offsite) or query all
+
 **When to use which:**
 - Webhook alert arrives → get_problem_details (Zabbix) for context
 - Network device issue → Juniper MCP for real-time + Zabbix for history
 - Proxmox host issue → Proxmox MCP for node status + Zabbix for history
+- Backup questions → pbs_query.py for backup status, missing backups, sync health
 - After investigation → acknowledge_event (Zabbix) to mark as handled
 
 **Knowledge Store (ak CLI) and Email Notifications (infra-notify)** are still available via shell_exec.
@@ -215,6 +229,7 @@ shell = [
     "ping *",
     "ak *",
     "infra-notify *",
+    "python3 /usr/local/share/inframon/skills/*",
     "python3 *",
 ]
 network = ["*"]
