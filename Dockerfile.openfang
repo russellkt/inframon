@@ -14,8 +14,11 @@ RUN apt-get update && apt-get install -y \
 # Install OpenFang via official install script (pre-built binary)
 RUN curl -fsSL https://openfang.sh/install | sh
 
-# Ensure openfang is on PATH
-ENV PATH="/root/.openfang/bin:${PATH}"
+# Install uv (for running MCP servers via uvx)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Ensure openfang and uv are on PATH
+ENV PATH="/root/.openfang/bin:/root/.local/bin:${PATH}"
 
 # Download built-in agent templates for reference
 RUN mkdir -p /opt/openfang \
