@@ -56,7 +56,7 @@ def load_container_env(key):
 
 def api_rpc(host, rpc, params=None, user=None, password=None):
     """Execute a Junos RPC via the REST API."""
-    url = f"http://{host}:8080/rpc/{rpc}"
+    url = f"http://{host}:3000/rpc/{rpc}"
 
     # Add RPC parameters as query string
     if params:

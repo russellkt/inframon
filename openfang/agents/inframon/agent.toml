@@ -183,8 +183,8 @@ Recipient: krussell1@baldwinmutual.com
 ### Network Switches
 | Switch | IP | Model | Access |
 |--------|-----|-------|--------|
-| bmic-ex3400-1 | 10.10.1.10 | Juniper EX3400-48P | REST API (port 8080) + Zabbix SNMP (hostid 10595) |
-| bmic-ex2300-1 | 10.10.1.9 | Juniper EX2300-C-12P | REST API (port 8080) + Zabbix SNMP (hostid 10594) |
+| bmic-ex3400-1 | 10.10.1.10 | Juniper EX3400-48P | REST API (port 3000) + Zabbix SNMP (hostid 10595) |
+| bmic-ex2300-1 | 10.10.1.9 | Juniper EX2300-C-12P | REST API (port 3000) + Zabbix SNMP (hostid 10594) |
 | bmic-icx6610-1 | 10.10.1.254 | Brocade ICX6610-48P | Zabbix SNMP (hostid 10585) |
 
 ### PBS Instances
