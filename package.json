@@ -5,13 +5,13 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "pm2-dev pm2.config.js",
+    "dev": "pm2-dev pm2.config.cjs",
     "build": "npm run build:server && npm run build:web-ui",
     "build:server": "tsc -p tsconfig.server.json",
     "build:web-ui": "cd web-ui-app && npm run build",
     "dev:server": "tsx watch src/server.ts",
     "preview": "cd web-ui-app && npm run preview",
-    "start": "pm2-runtime start pm2.config.js",
+    "start": "pm2-runtime start pm2.config.cjs",
     "logs": "pm2 logs",
     "stop": "pm2 stop all",
     "restart": "pm2 restart all"

@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   apps: [
     {
       name: "inframon-api",
@@ -18,12 +18,11 @@ export default {
     },
     {
       name: "inframon-web-ui",
-      script: "npm",
-      args: "run preview",
+      script: "/app/web-ui-app/node_modules/.bin/vite",
+      args: "preview --host 0.0.0.0 --port 3000",
       cwd: "/app/web-ui-app",
       exec_mode: "fork",
       env: {
-        PORT: "3000",
         NODE_ENV: process.env.NODE_ENV || "production",
       },
       error_file: "./logs/web-ui.error.log",

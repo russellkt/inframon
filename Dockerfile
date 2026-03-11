@@ -26,7 +26,7 @@ COPY src/ ./src/
 RUN npm run build:server
 
 # Copy pm2 config
-COPY pm2.config.js .
+COPY pm2.config.cjs .
 
 # Expose ports (3000 for web-ui, 3001 for API)
 EXPOSE 3000 3001
@@ -36,4 +36,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3001/health || exit 1
 
 # Run both API server and web-ui
-CMD ["pm2-runtime", "start", "pm2.config.js"]
+CMD ["pm2-runtime", "start", "pm2.config.cjs"]
