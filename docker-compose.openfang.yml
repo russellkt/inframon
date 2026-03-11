@@ -12,8 +12,8 @@ services:
       dockerfile: Dockerfile.openfang
     container_name: bmic-inframon-openfang
     ports:
-      - "4200:4200"   # Dashboard + API
-      - "8080:8080"   # Webhook gateway (for Zabbix push alerts)
+      - "4200:50051"   # Dashboard + API (external:internal)
+      - "8080:8080"    # Webhook gateway (for Zabbix push alerts)
     environment:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - ZABBIX_API_URL=${ZABBIX_API_URL}
@@ -27,13 +27,14 @@ services:
       # Persistent data (SQLite DB, memory, sessions)
       - ./openfang/data:/data/data
       # SSH key for Proxmox/switch access (dedicated key — NOT personal keys)
-      - ${INFRAMON_SSH_KEY:-./openfang/ssh/id_ed25519}:/root/.ssh/id_ed25519:ro
-      - ${INFRAMON_SSH_KEY:-./openfang/ssh/id_ed25519}.pub:/root/.ssh/id_ed25519.pub:ro
+      # Comment out until key is generated:
+      # - ${INFRAMON_SSH_KEY:-./openfang/ssh/id_ed25519}:/root/.ssh/id_ed25519:ro
+      # - ${INFRAMON_SSH_KEY:-./openfang/ssh/id_ed25519}.pub:/root/.ssh/id_ed25519.pub:ro
     networks:
       - bmic-infra
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:4200/health"]
+      test: ["CMD", "curl", "-sf", "http://localhost:50051/health"]
       interval: 30s
       timeout: 10s
       retries: 3

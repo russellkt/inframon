@@ -3,7 +3,7 @@
 
 # API server settings
 # api_key = ""                               # Set to enable Bearer auth (recommended for production)
-# api_listen = "0.0.0.0:4200"               # Bind to all interfaces for Docker
+api_listen = "0.0.0.0:50051"                 # Bind to all interfaces for Docker
 
 [default_model]
 provider = "openrouter"
@@ -16,7 +16,7 @@ decay_rate = 0.05
 # sqlite_path = "/data/openfang.db"          # Docker volume path
 
 [network]
-listen_addr = "0.0.0.0:4200"
+listen_addr = "0.0.0.0:50051"
 
 # Session compaction
 [compaction]
