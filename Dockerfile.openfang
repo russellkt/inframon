@@ -34,7 +34,7 @@ RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh \
 VOLUME /data
 ENV OPENFANG_HOME=/data
 
-EXPOSE 4200 8080
+EXPOSE 4200 8460
 
 ENTRYPOINT ["openfang"]
 CMD ["start"]

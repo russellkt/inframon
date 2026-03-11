@@ -13,7 +13,7 @@ services:
     container_name: bmic-inframon-openfang
     ports:
       - "4200:50051"   # Dashboard + API (external:internal)
-      - "8080:8080"    # Webhook gateway (for Zabbix push alerts)
+      - "8460:8460"    # Webhook gateway (for Zabbix push alerts)
     environment:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - ZABBIX_API_URL=${ZABBIX_API_URL}
