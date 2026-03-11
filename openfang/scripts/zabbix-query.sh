@@ -1,23 +1,18 @@
 #!/bin/sh
 # Zabbix JSON-RPC query helper for OpenFang shell_exec
-# Writes params to a temp file to avoid shell metacharacter issues.
+# Reads env from /proc/1/environ since sandbox strips env vars.
 #
 # Usage: zabbix-query.sh <method> [params_json_file]
-#
-# If no params file given, uses empty params {}.
-# The agent should write JSON params to /tmp/zabbix-params.json first,
-# then call this script.
-#
-# Examples:
-#   # Simple: no params needed
-#   zabbix-query.sh apiinfo.version
-#
-#   # With params file:
-#   echo '{"output":"extend","recent":true,"limit":5}' > /tmp/zabbix-params.json
-#   zabbix-query.sh problem.get /tmp/zabbix-params.json
 
 METHOD="$1"
 PARAMS_FILE="${2:-}"
+
+# Read env vars from container's PID 1 (sandbox strips them)
+if [ -z "$ZABBIX_API_URL" ] && [ -f /proc/1/environ ]; then
+    ZABBIX_API_URL=$(tr '\0' '\n' < /proc/1/environ | grep '^ZABBIX_API_URL=' | cut -d= -f2-)
+    ZABBIX_API_TOKEN=$(tr '\0' '\n' < /proc/1/environ | grep '^ZABBIX_API_TOKEN=' | cut -d= -f2-)
+    export ZABBIX_API_URL ZABBIX_API_TOKEN
+fi
 
 if [ -n "$PARAMS_FILE" ] && [ -f "$PARAMS_FILE" ]; then
     PARAMS=$(cat "$PARAMS_FILE")
