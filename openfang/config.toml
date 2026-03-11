@@ -54,6 +54,12 @@ usage_footer = "Full"
 # bot_token_env = "SLACK_BOT_TOKEN"
 # app_token_env = "SLACK_APP_TOKEN"
 
+# ── Webhook Channel (Zabbix push alerts) ───────────────────────────────
+[channels.webhook]
+secret_env = "WEBHOOK_SECRET"
+listen_port = 8460
+default_agent = "inframon"
+
 # ── MCP Server Connections ───────────────────────────────────────────
 # Future: expose inframon tools to Claude Code / other agents
 # [[mcp_servers]]

@@ -22,6 +22,10 @@ services:
       - OLLAMA_BASE_URL=http://10.10.1.149:11434
       - OPENFANG_HOME=/data
       - RUST_LOG=info
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      - PVE_API_URL=${PVE_API_URL}
+      - PVE_API_TOKEN_ID=${PVE_API_TOKEN_ID}
+      - PVE_API_TOKEN_SECRET=${PVE_API_TOKEN_SECRET}
     volumes:
       # OpenFang config and agents
       - ./openfang/config.toml:/data/config.toml:ro
