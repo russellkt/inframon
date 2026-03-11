@@ -9,10 +9,19 @@ Credentials are read from environment variables:
 """
 
 import os
+from pathlib import Path
 from typing import Optional
 
 from fastmcp import FastMCP
 from pyzabbix import ZabbixAPI
+
+# OpenFang strips env vars from MCP subprocess — recover from init process
+_proc_env = Path("/proc/1/environ")
+if _proc_env.exists():
+    for entry in _proc_env.read_bytes().split(b"\0"):
+        if b"=" in entry:
+            k, v = entry.decode("utf-8", errors="replace").split("=", 1)
+            os.environ.setdefault(k, v)
 
 mcp = FastMCP("Zabbix Monitoring MCP Server")
 
