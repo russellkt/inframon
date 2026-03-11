@@ -6,10 +6,10 @@ module = "builtin:chat"
 exec_policy = "full"
 
 [model]
-provider = "openai"
-model = "Qwen3.5-9B.Q8_0.gguf"
-base_url = "http://10.10.1.149:8080/v1"
-api_key_env = "LLAMA_API_KEY"
+provider = "openrouter"
+model = "qwen/qwen3.5-35b-a3b"
+api_key_env = "OPENROUTER_API_KEY"
+base_url = "https://openrouter.ai/api/v1"
 max_tokens = 4096
 temperature = 0.2
 system_prompt = """You are **inframon**, an infrastructure troubleshooting agent for BMIC's Proxmox + Zabbix environment.

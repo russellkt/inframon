@@ -28,7 +28,7 @@ services:
       - PVE_API_TOKEN_SECRET=${PVE_API_TOKEN_SECRET}
     volumes:
       # OpenFang config and agents
-      - ./openfang/config.toml:/data/config.toml:ro
+      - ./openfang/config.toml:/data/config.toml
       - ./openfang/agents:/data/agents:ro
       - ./openfang/scripts:/usr/local/share/inframon/scripts:ro
       # Persistent data (SQLite DB, memory, sessions)
@@ -40,7 +40,7 @@ services:
       - bmic-infra
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:50051/health"]
+      test: ["CMD", "curl", "-sf", "http://localhost:50051/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
