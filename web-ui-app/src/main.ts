@@ -202,6 +202,25 @@ const openSessionHistory = async () => {
   }
 };
 
+const openSettings = () => {
+  // Focus the chat panel so keyboard shortcuts work
+  const chatPanelElement = document.querySelector('[role="main"]') || document.body;
+  (chatPanelElement as HTMLElement).focus();
+
+  // Dispatch keyboard shortcut to trigger settings in ChatPanel
+  // Try Ctrl+, which might be the settings shortcut
+  const event = new KeyboardEvent('keydown', {
+    key: ',',
+    code: 'Comma',
+    ctrlKey: true,
+    bubbles: true,
+    cancelable: true,
+  });
+
+  document.dispatchEvent(event);
+  chatPanelElement.dispatchEvent(event);
+};
+
 const renderApp = () => {
   const app = document.getElementById("app");
   if (!app) return;
@@ -248,6 +267,7 @@ const renderApp = () => {
             variant: "ghost",
             size: "sm",
             children: icon(Settings, "sm"),
+            onClick: openSettings,
             title: "Settings",
           })}
         </div>
