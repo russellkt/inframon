@@ -214,6 +214,18 @@ Polling: Still external via launchd (not in container)
 5. Polling via launchd continues on Mac (or move to container)
 ```
 
+### Future: Tailscale Integration
+
+See [TAILSCALE.md](./TAILSCALE.md) for securing access via Tailscale mesh VPN.
+
+**Current code is already compatible** — just update `.env` with `*.tailscale.local` hostnames.
+
+```env
+ZABBIX_API_URL=http://zabbix.tailscale.local/api_jsonrpc.php
+PROXMOX_HOST=proxmox.tailscale.local
+INFRAMON_WEB_URL=https://inframon.tailscale.local
+```
+
 ## Files Reference
 
 | Path | Purpose |
