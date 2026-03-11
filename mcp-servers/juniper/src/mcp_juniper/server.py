@@ -15,10 +15,7 @@ from typing import Optional
 
 from fastmcp import FastMCP
 from jnpr.junos import Device
-mcp = FastMCP(
-    "Juniper Switch MCP Server",
-    description="Query Juniper EX switches for real-time interface, alarm, LLDP, and environment data.",
-)
+mcp = FastMCP("Juniper Switch MCP Server")
 
 # Switch aliases — agent can use friendly names
 SWITCH_ALIASES = {

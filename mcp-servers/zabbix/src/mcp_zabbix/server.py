@@ -14,10 +14,7 @@ from typing import Optional
 from fastmcp import FastMCP
 from pyzabbix import ZabbixAPI
 
-mcp = FastMCP(
-    "Zabbix Monitoring MCP Server",
-    description="Query Zabbix 7.0 for active problems, host status, metrics, history, and event management.",
-)
+mcp = FastMCP("Zabbix Monitoring MCP Server")
 
 
 def _get_api() -> ZabbixAPI:

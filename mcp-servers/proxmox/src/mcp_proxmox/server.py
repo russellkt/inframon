@@ -19,10 +19,7 @@ from proxmoxer import ProxmoxAPI
 # Suppress InsecureRequestWarning for self-signed certs
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-mcp = FastMCP(
-    "Proxmox VE MCP Server",
-    description="Query Proxmox VE cluster for node status, VMs, storage, and cluster health.",
-)
+mcp = FastMCP("Proxmox VE MCP Server")
 
 
 def _get_api() -> ProxmoxAPI:

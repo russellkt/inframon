@@ -35,8 +35,8 @@ timeout_secs = 30
 
 [mcp_servers.transport]
 type = "stdio"
-command = "uvx"
-args = ["--directory", "/usr/local/share/inframon/mcp-servers/juniper", "mcp-juniper"]
+command = "mcp-juniper"
+args = []
 
 [[mcp_servers]]
 name = "zabbix"
@@ -44,8 +44,8 @@ timeout_secs = 30
 
 [mcp_servers.transport]
 type = "stdio"
-command = "uvx"
-args = ["--directory", "/usr/local/share/inframon/mcp-servers/zabbix", "mcp-zabbix"]
+command = "mcp-zabbix"
+args = []
 
 [[mcp_servers]]
 name = "proxmox"
@@ -53,5 +53,5 @@ timeout_secs = 30
 
 [mcp_servers.transport]
 type = "stdio"
-command = "uvx"
-args = ["--directory", "/usr/local/share/inframon/mcp-servers/proxmox", "mcp-proxmox"]
+command = "mcp-proxmox"
+args = []
