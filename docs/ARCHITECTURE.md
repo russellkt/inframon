@@ -252,7 +252,10 @@ INFRAMON_WEB_URL=https://inframon.tailscale.local
 ### Network Access
 
 - **Web UI ↔ API Proxy:** localhost (Docker internal)
-- **Polling ↔ Zabbix:** Internal network (10.10.1.142)
+- **Docker Network:** 10.10.100.0/24 (tagged for infrastructure LAN access)
+- **API Proxy ↔ Zabbix:** 10.10.100.x → 10.10.1.142 (internal network)
+- **API Proxy ↔ Proxmox:** 10.10.100.x → 10.10.1.x (SSH on internal network)
+- **Polling ↔ Zabbix:** External via launchd on macOS (10.10.1.142)
 - **Web UI ↔ AI Provider:** Direct from browser (user's API key)
 
 ## Error Handling

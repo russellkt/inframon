@@ -35,7 +35,11 @@ services:
 networks:
   bmic-infra:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.100.0/24
 
 # Note: Zabbix polling runs externally on macOS via launchd
 # (poll_zabbix.py in ~/git/bmic-proxmox/scripts/infra-monitor/)
 # The Docker container provides the web UI and API proxy only.
+# Docker network on 10.10.100.0/24 allows direct access to 10.10.x.x infrastructure.
