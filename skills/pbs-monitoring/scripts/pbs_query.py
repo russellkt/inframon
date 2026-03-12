@@ -26,14 +26,15 @@ Usage:
 import argparse
 import json
 import os
+import ssl
 import sys
-import urllib3
+import urllib.error
+import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 from urllib.parse import quote
-
-import requests
 
 # OpenFang strips env vars from subprocesses — recover from init process
 _proc_env = Path("/proc/1/environ")
@@ -43,8 +44,29 @@ if _proc_env.exists():
             k, v = entry.decode("utf-8", errors="replace").split("=", 1)
             os.environ.setdefault(k, v)
 
-# Suppress InsecureRequestWarning for self-signed certs
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def _make_opener(verify_ssl: bool) -> urllib.request.OpenerDirector:
+    if verify_ssl:
+        return urllib.request.build_opener()
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return urllib.request.build_opener(urllib.request.HTTPSHandler(context=ctx))
+
+
+def _http_get(opener: urllib.request.OpenerDirector, url: str,
+              headers: dict, params: Optional[dict] = None) -> dict:
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with opener.open(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data.get("data", data)
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"HTTP {e.code}: {e.read().decode()}") from e
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"URL error: {e.reason}") from e
 
 
 class PBSClient:
@@ -55,20 +77,12 @@ class PBSClient:
                  verify_ssl: bool = False):
         self.name = name
         self.base_url = f"https://{host}:{port}"
-        self.token_id = token_id
-        self.token_secret = token_secret
-        self.verify_ssl = verify_ssl
-        self.session = requests.Session()
-        self.session.verify = verify_ssl
-        self.session.headers.update({
-            "Authorization": f"PBSAPIToken={token_id}:{token_secret}",
-        })
+        self._opener = _make_opener(verify_ssl)
+        self._headers = {"Authorization": f"PBSAPIToken={token_id}:{token_secret}"}
 
     def get(self, path: str, params: Optional[dict] = None) -> dict:
         url = f"{self.base_url}/api2/json{path}"
-        resp = self.session.get(url, params=params, timeout=30)
-        resp.raise_for_status()
-        return resp.json().get("data", resp.json())
+        return _http_get(self._opener, url, self._headers, params)
 
     def __repr__(self):
         return f"PBSClient({self.name}@{self.base_url})"
@@ -300,17 +314,14 @@ def cmd_missing_backups(clients: dict[str, PBSClient], args):
         return {"error": "PVE_API_URL, PVE_API_TOKEN_ID, PVE_API_TOKEN_SECRET required for cross-ref"}
 
     verify_ssl = os.environ.get("PBS_VERIFY_SSL", "0") == "1"
-    pve_session = requests.Session()
-    pve_session.verify = verify_ssl
-    pve_session.headers.update({
-        "Authorization": f"PVEAPIToken={pve_token_id}={pve_token_secret}",
-    })
+    pve_opener = _make_opener(verify_ssl)
+    pve_headers = {"Authorization": f"PVEAPIToken={pve_token_id}={pve_token_secret}"}
 
     try:
-        resp = pve_session.get(f"{pve_url}/api2/json/cluster/resources",
-                               params={"type": "vm"}, timeout=30)
-        resp.raise_for_status()
-        pve_vms = resp.json().get("data", [])
+        pve_vms = _http_get(pve_opener, f"{pve_url}/api2/json/cluster/resources",
+                            pve_headers, params={"type": "vm"})
+        if not isinstance(pve_vms, list):
+            pve_vms = pve_vms.get("data", [])
     except Exception as e:
         return {"error": f"Failed to query PVE: {e}"}
 
