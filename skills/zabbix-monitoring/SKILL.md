@@ -5,23 +5,7 @@ description: Query Zabbix monitoring — check active problems, host metrics, hi
 
 # Zabbix Monitoring
 
-Query Zabbix 7.0 API via `scripts/zabbix_query.py`.
-
-## Monitored Hosts
-
-| hostid | host | IP | Type |
-|--------|------|----|------|
-| 10084 | Zabbix server | 127.0.0.1 | Monitoring |
-| 10585 | icx6610 | 192.168.2.202 | Switch (Brocade) |
-| 10589 | sonic-tz370 | 192.168.2.2 | Firewall |
-| 10590 | pve-z2 | 10.10.1.77 | Proxmox hypervisor |
-| 10591 | pve-p520 | 10.10.1.80 | Proxmox hypervisor |
-| 10593 | pdu-pro | 192.168.2.17 | PDU |
-| 10594 | ex2300 | 10.10.1.9 | Switch (Juniper EX2300) |
-| 10595 | ex3400 | 10.10.1.10 | Switch (Juniper EX3400) |
-| 10596 | pve-r720 | 10.10.1.14 | Proxmox hypervisor |
-| 10597 | pve5820gpu | 10.10.1.92 | Proxmox hypervisor |
-| 10598 | pve-r620 | 10.10.1.79 | Proxmox hypervisor |
+Query Zabbix 7.0 API via `scripts/zabbix_query.py`. See **infrastructure-reference** skill for Zabbix host IDs and full host inventory.
 
 ## Commands
 

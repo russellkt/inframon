@@ -139,55 +139,9 @@ python3 /data/skills/email-notify/scripts/email_notify.py --subject "[WARNING] I
 Subject prefixes: [CRITICAL] for sev 4-5, [WARNING] for sev 2-3, [INFO] for sev 1.
 Recipient: krussell1@baldwinmutual.com
 
-## Host Inventory
+## Host Inventory & Severity Levels
 
-### Zabbix Monitored Hosts
-| hostid | host | IP | Type |
-|--------|------|----|------|
-| 10084 | Zabbix server | 127.0.0.1 | Monitoring |
-| 10585 | icx6610 | 192.168.2.202 | Switch (Brocade) |
-| 10589 | sonic-tz370 | 192.168.2.2 | Firewall |
-| 10590 | pve-z2 | 10.10.1.77 | Proxmox hypervisor |
-| 10591 | pve-p520 | 10.10.1.80 | Proxmox hypervisor |
-| 10593 | pdu-pro | 192.168.2.17 | PDU |
-| 10594 | ex2300 | 10.10.1.9 | Switch (Juniper EX2300) |
-| 10595 | ex3400 | 10.10.1.10 | Switch (Juniper EX3400) |
-| 10596 | pve-r720 | 10.10.1.14 | Proxmox hypervisor |
-| 10597 | pve5820gpu | 10.10.1.92 | Proxmox hypervisor |
-| 10598 | pve-r620 | 10.10.1.79 | Proxmox hypervisor |
-
-### Proxmox Cluster Nodes
-| Node | IP | Hardware | RAM | Access |
-|------|-----|----------|-----|--------|
-| pve-r720 | 10.10.1.14 | Dell R720, 16c/32t | 168 GB | REST API (primary) |
-| pve-p520 | 10.10.1.80 | HP P520, 8c/16t | 128 GB | REST API |
-| pve-z2 | 10.10.1.77 | HP Z2 G4, 8c/16t | 32 GB | REST API |
-| pve5820gpu | 10.10.1.92 | Workstation (GPU) | 32 GB | REST API |
-| pve-r620 | 10.10.1.79 | Dell R620, 12c/24t | 128 GB | REST API |
-
-### Network Switches
-| Switch | IP | Model | Access |
-|--------|-----|-------|--------|
-| bmic-ex3400-1 | 10.10.1.10 | Juniper EX3400-48P | juniper_query.py (REST API) + zabbix_query.py (hostid 10595) |
-| bmic-ex2300-1 | 10.10.1.9 | Juniper EX2300-C-12P | juniper_query.py (REST API) + zabbix_query.py (hostid 10594) |
-| bmic-icx6610-1 | 10.10.1.254 | Brocade ICX6610-48P | zabbix_query.py SNMP (hostid 10585) |
-
-### PBS Instances
-| Instance | IP | Host | Storage |
-|----------|-----|------|---------|
-| PBS Primary (CT 851) | 10.10.1.141 | pve-r720 | ZFS `spinners`, ~3.4TB free |
-| PBS TS140 (Incus LXC) | 10.10.1.145 | truenas-ts140 | ZFS `tank`, ~3.8TB free |
-| PBS Offsite (CT 821) | 100.100.58.6 | pve-705mini | ZFS mirror 2x6TB, ~1.4TB free |
-
-## Severity Levels
-| Value | Label | Action |
-|-------|-------|--------|
-| 0 | Not classified | Ignore |
-| 1 | Information | Log only |
-| 2 | Warning | Monitor, notify if persistent |
-| 3 | Average | Investigate, notify |
-| 4 | High | Notify immediately, investigate urgently |
-| 5 | Disaster | Notify immediately, escalate |
+See the **infrastructure-reference** skill for complete host inventory (IPs, hardware, Zabbix host IDs, PBS instances, VLANs) and severity level definitions. That skill is the single source of truth — do not hardcode host details.
 
 ## Investigation Flow
 
@@ -233,12 +187,6 @@ Acknowledge: zabbix_query.py acknowledge <event_id> --message "findings"
 
 When suppressing, always log reason via `ak store`.
 
-## VLAN Reference
-| VLAN | Name | Subnet | Purpose |
-|------|------|--------|---------|
-| 1 | DEFAULT-VLAN | 192.168.2.0/24 | Corporate LAN |
-| 10 | VOIP | — | IP phones |
-| 1010 | SERVE | 10.10.1.0/24 | Infrastructure |
 """
 
 [model.fallback]
