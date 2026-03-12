@@ -2,6 +2,10 @@
 
 OpenFang-based infrastructure monitoring agent for BMIC. Monitors Proxmox cluster, Juniper switches, Zabbix alerts, and PBS backup servers via Discord/webhook interface.
 
+## OpenFang Reference
+
+For comprehensive OpenFang platform docs, read `openfang/docs/SUMMARY.md` — it covers agents, skills, hands, channels, API, CLI, workflows, and troubleshooting in a single pass. Full upstream docs are in `openfang/docs/`.
+
 ## Architecture
 
 - **Runtime:** OpenFang agent OS in Docker (`docker-compose.openfang.yml`)
