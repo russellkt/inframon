@@ -8,6 +8,9 @@ if [ -z "$PATROL_ID" ]; then
     exit 1
 fi
 
+# Start a fresh session so each patrol run has a clean context
+curl -sf -X POST "http://localhost:4200/api/agents/$PATROL_ID/session/reset" >> /tmp/patrol-cron.log 2>&1
+
 curl -sf -X POST "http://localhost:4200/api/agents/$PATROL_ID/message" \
     -H "Content-Type: application/json" \
     -d '{"message": "Run nightly patrol. Check all infrastructure and post report."}' \
