@@ -89,17 +89,14 @@ def resolve_host(hostname):
 
 def cmd_active_problems(args):
     params = {
-        "output": "extend",
+        "output": ["eventid", "name", "severity", "clock", "acknowledged", "opdata"],
         "sortfield": ["eventid"],
         "sortorder": "DESC",
         "recent": True,
-        "selectTags": "extend",
-        "selectSuppressionData": "extend",
+        "limit": args.limit or 50,
     }
     if args.severity_min is not None:
         params["severities"] = list(range(args.severity_min, 6))
-    if args.limit:
-        params["limit"] = args.limit
     if args.host:
         hostid, err = resolve_host(args.host)
         if err:
@@ -110,15 +107,14 @@ def cmd_active_problems(args):
 
 def cmd_unacknowledged_problems(args):
     params = {
-        "output": "extend",
+        "output": ["eventid", "name", "severity", "clock", "acknowledged", "opdata"],
         "sortfield": ["eventid"],
         "sortorder": "DESC",
         "recent": True,
         "acknowledged": False,
         "severities": list(range(args.severity_min if args.severity_min is not None else 2, 6)),
+        "limit": args.limit or 50,
     }
-    if args.limit:
-        params["limit"] = args.limit
     return zabbix_rpc("problem.get", params)
 
 
