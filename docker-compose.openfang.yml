@@ -40,7 +40,6 @@ services:
       - ./openfang/config.toml:/data/config.toml
       - ./openfang/agents:/data/agents:ro
       - ./openfang/scripts:/usr/local/share/inframon/scripts:ro
-      - ./mcp-servers:/usr/local/share/inframon/mcp-servers:ro
       - ./skills:/usr/local/share/inframon/skills:ro
       # Persistent data (SQLite DB, memory, sessions)
       - ./openfang/data:/data/data

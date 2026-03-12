@@ -38,31 +38,3 @@ decay_rate = 0.05
 
 [network]
 listen_addr = "0.0.0.0:50051"
-
-# ── MCP Servers ─────────────────────────────────────────────────────
-[[mcp_servers]]
-name = "juniper"
-timeout_secs = 30
-
-[mcp_servers.transport]
-type = "stdio"
-command = "mcp-juniper"
-args = []
-
-[[mcp_servers]]
-name = "zabbix"
-timeout_secs = 30
-
-[mcp_servers.transport]
-type = "stdio"
-command = "mcp-zabbix"
-args = []
-
-[[mcp_servers]]
-name = "proxmox"
-timeout_secs = 30
-
-[mcp_servers.transport]
-type = "stdio"
-command = "mcp-proxmox"
-args = []

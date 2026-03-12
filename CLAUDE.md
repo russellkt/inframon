@@ -1,39 +1,36 @@
 # inframon
 
-OpenFang-based infrastructure monitoring agent for BMIC. Monitors Proxmox cluster, Juniper switches, Zabbix alerts, and PBS backup servers via Telegram/webhook interface.
+OpenFang-based infrastructure monitoring agent for BMIC. Monitors Proxmox cluster, Juniper switches, Zabbix alerts, and PBS backup servers via Discord/webhook interface.
 
 ## Architecture
 
 - **Runtime:** OpenFang agent OS in Docker (`docker-compose.openfang.yml`)
 - **LLM:** Qwen 3.5 35B via OpenRouter (fallback: Gemini 2.5 Flash)
-- **Interface:** Telegram bot (@Inframonbotbot) + webhook gateway (port 8460)
-- **MCP Servers:** 3 stdio servers (juniper, zabbix, proxmox) — FastMCP 2.x, registered in `config.toml`
-- **Skills:** `skills/` directory — Agent Skills standard (SKILL.md + scripts)
+- **Interface:** Discord bot (@bmic-inframon) + webhook gateway (port 8460)
+- **Skills:** `skills/` directory — Agent Skills standard (SKILL.md + scripts), stdlib-only Python
+- **MCP Servers:** `mcp-servers/` directory — legacy, no longer built or used (kept for reference)
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `openfang/config.toml` | OpenFang config: MCP servers, channels, model, approval |
+| `openfang/config.toml` | OpenFang config: channels, model, approval |
 | `openfang/agents/inframon/agent.toml` | Agent system prompt, capabilities, model config |
 | `docker-compose.openfang.yml` | Container config, env vars, volumes, networking |
-| `Dockerfile.openfang` | Container build — installs MCP servers into /opt/mcp-venv |
-| `mcp-servers/` | FastMCP 2.x MCP servers (juniper, zabbix, proxmox) |
-| `skills/` | Agent Skills (pbs-monitoring) |
-| `openfang/scripts/` | Shell-accessible scripts mounted at /usr/local/share/inframon/scripts |
+| `Dockerfile.openfang` | Container build (no third-party deps) |
+| `skills/` | Agent Skills (juniper, zabbix, proxmox, pbs monitoring) |
 
-## MCP Server Pattern
+## Skill Pattern
 
-All MCP servers follow the same structure:
+All monitoring skills follow the same structure:
 ```
-mcp-servers/<name>/
-├── pyproject.toml          # hatchling build, fastmcp>=2.0,<3.0, entry point
-└── src/mcp_<name>/
-    ├── __init__.py
-    └── server.py           # FastMCP('Name'), @mcp.tool(), main() calls mcp.run()
+skills/<name>/
+├── SKILL.md              # Metadata (name, description, trigger words), docs, investigation patterns
+└── scripts/
+    └── <name>_query.py   # argparse CLI, JSON output, stdlib only
 ```
 
-**Env var recovery** — OpenFang strips env vars from MCP subprocesses. Every server reads `/proc/1/environ` at import time:
+**Env var recovery** — OpenFang strips env vars from shell_exec subprocesses. Every skill script reads `/proc/1/environ` at import time:
 ```python
 _proc_env = Path("/proc/1/environ")
 if _proc_env.exists():
@@ -45,12 +42,10 @@ if _proc_env.exists():
 
 ## Known Gotchas
 
-- **FastMCP pinned to 2.x** — 3.x stdio transport hangs on tool calls
-- **FastMCP 3.x API change** — `FastMCP('Name')` only, no `description=` kwarg
-- **OpenFang strips env vars** — both shell_exec and MCP subprocesses; recover from `/proc/1/environ`
-- **uvx doesn't install local packages** — use `uv pip install` into a venv with entry points
+- **OpenFang strips env vars** — shell_exec subprocesses; recover from `/proc/1/environ`
 - **OpenFang approval** — needs BOTH `require_approval=false` AND `auto_approve=true`
 - **Shell sandbox blocks curly braces** — use Python wrapper scripts instead of inline shell
+- **Juniper REST API** — port 3000, returns multipart XML (scripts handle conversion to JSON)
 
 ## Infrastructure
 
@@ -79,7 +74,7 @@ Set in `.env`, passed through `docker-compose.openfang.yml`:
 - `OPENROUTER_API_KEY` — LLM access
 - `ZABBIX_API_URL`, `ZABBIX_API_TOKEN` — Zabbix monitoring
 - `PVE_API_URL`, `PVE_API_TOKEN_ID`, `PVE_API_TOKEN_SECRET` — Proxmox VE
-- `JUNIPER_USER`, `JUNIPER_PASSWORD` — Switch NETCONF
-- `TELEGRAM_BOT_TOKEN` — Telegram bot
+- `JUNIPER_USER`, `JUNIPER_PASSWORD` — Switch REST API
+- `DISCORD_BOT_TOKEN` — Discord bot
 - `WEBHOOK_SECRET` — Zabbix webhook auth
 - `PBS_INSTANCES`, `PBS_API_TOKEN_ID`, `PBS_API_TOKEN_SECRET` — PBS monitoring

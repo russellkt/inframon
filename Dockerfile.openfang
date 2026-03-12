@@ -14,21 +14,8 @@ RUN apt-get update && apt-get install -y \
 # Install OpenFang via official install script (pre-built binary)
 RUN curl -fsSL https://openfang.sh/install | sh
 
-# Install uv (for running MCP servers via uvx)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Ensure openfang and uv are on PATH
-ENV PATH="/root/.openfang/bin:/root/.local/bin:${PATH}"
-
-# Install MCP servers into a shared venv so entry points are available
-RUN uv venv /opt/mcp-venv
-COPY mcp-servers/juniper /tmp/mcp-juniper
-RUN uv pip install --python /opt/mcp-venv/bin/python /tmp/mcp-juniper && rm -rf /tmp/mcp-juniper
-COPY mcp-servers/zabbix /tmp/mcp-zabbix
-RUN uv pip install --python /opt/mcp-venv/bin/python /tmp/mcp-zabbix && rm -rf /tmp/mcp-zabbix
-COPY mcp-servers/proxmox /tmp/mcp-proxmox
-RUN uv pip install --python /opt/mcp-venv/bin/python /tmp/mcp-proxmox && rm -rf /tmp/mcp-proxmox
-ENV PATH="/opt/mcp-venv/bin:${PATH}"
+# Ensure openfang is on PATH
+ENV PATH="/root/.openfang/bin:${PATH}"
 
 # Download built-in agent templates for reference
 RUN mkdir -p /opt/openfang \
