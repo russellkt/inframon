@@ -29,14 +29,14 @@ When you receive a webhook alert, it contains: host, severity, event_id, trigger
 **Step 1 — Check suppression rules** (see Notification Suppression section). If suppressed, log reason via `ak store` and stop.
 
 **Step 2 — Gather context from Zabbix:**
-- `zabbix_query.py problem-details <event_id>` for full problem context
-- `zabbix_query.py host-items <host>` to see current metrics
-- `zabbix_query.py history <itemid>` for the triggering item's recent values
+- `python3 /data/skills/zabbix-monitoring/scripts/zabbix_query.py problem-details <event_id>`
+- `python3 /data/skills/zabbix-monitoring/scripts/zabbix_query.py host-items <host>`
+- `python3 /data/skills/zabbix-monitoring/scripts/zabbix_query.py history <itemid>`
 
 **Step 3 — Investigate with monitoring skills:**
-- Proxmox host → `proxmox_query.py node-status <node>`, `proxmox_query.py cluster-status`, `proxmox_query.py vms`
-- Network device → `juniper_query.py interfaces <host>`, `juniper_query.py alarms <host>`, `juniper_query.py lldp-neighbors <host>` + `zabbix_query.py history <itemid>`
-- Any host → `zabbix_query.py host-items <host>` for current metrics, `zabbix_query.py history <itemid>` for trends
+- Proxmox host → `python3 /data/skills/proxmox-monitoring/scripts/proxmox_query.py node-status <node>`
+- Network device → `python3 /data/skills/juniper-monitoring/scripts/juniper_query.py interfaces <host>`
+- Any host → `python3 /data/skills/zabbix-monitoring/scripts/zabbix_query.py host-items <host>`
 
 **Step 4 — Triage and act:**
 - After investigation, decide if the issue warrants human attention:
@@ -52,7 +52,7 @@ When you receive a webhook alert, it contains: host, severity, event_id, trigger
 All monitoring tools are shell scripts run via `shell_exec`. Each skill has a SKILL.md with full documentation.
 
 **Zabbix Monitoring** — Monitoring data, alerts, and history
-- `python3 /usr/local/share/inframon/skills/zabbix-monitoring/scripts/zabbix_query.py <command>`
+- `python3 /data/skills/zabbix-monitoring/scripts/zabbix_query.py <command>`
 - active-problems [--severity-min N] [--host NAME] — Current unresolved problems
 - unacknowledged-problems [--severity-min N] — Problems not yet handled
 - hosts — All monitored hosts with status
@@ -63,7 +63,7 @@ All monitoring tools are shell scripts run via `shell_exec`. Each skill has a SK
 - problem-details <event_id> — Full context for a specific event
 
 **Juniper Switch Monitoring** — Real-time switch state
-- `python3 /usr/local/share/inframon/skills/juniper-monitoring/scripts/juniper_query.py <command> <host>`
+- `python3 /data/skills/juniper-monitoring/scripts/juniper_query.py <command> <host>`
 - interfaces <host> [--name IF] [--terse] — Port status and traffic stats
 - alarms <host> — Active alarms with severity
 - lldp-neighbors <host> — Physical connectivity discovery
@@ -76,7 +76,7 @@ All monitoring tools are shell scripts run via `shell_exec`. Each skill has a SK
 - Host can be IP or alias: ex3400 (10.10.1.10), ex2300 (10.10.1.9)
 
 **Proxmox Cluster Monitoring** — Hypervisor cluster status
-- `python3 /usr/local/share/inframon/skills/proxmox-monitoring/scripts/proxmox_query.py <command>`
+- `python3 /data/skills/proxmox-monitoring/scripts/proxmox_query.py <command>`
 - cluster-status — Cluster health, quorum, node membership
 - nodes — All nodes with CPU/memory/disk usage
 - node-status <node> — Detailed node info
@@ -86,7 +86,7 @@ All monitoring tools are shell scripts run via `shell_exec`. Each skill has a SK
 - node-networks <node> — Network interface config
 
 **PBS Monitoring** — Backup server status
-- `python3 /usr/local/share/inframon/skills/pbs-monitoring/scripts/pbs_query.py <command>`
+- `python3 /data/skills/pbs-monitoring/scripts/pbs_query.py <command>`
 - datastores — Storage usage and dedup ratios
 - snapshots [--vmid N] — Backup snapshots per VM
 - backup-jobs — Recent backup task history
@@ -99,11 +99,11 @@ All monitoring tools are shell scripts run via `shell_exec`. Each skill has a SK
 - All commands accept `--instance NAME` (primary, ts140, offsite) or query all
 
 **When to use which:**
-- Webhook alert arrives → `zabbix_query.py problem-details <event_id>` for context
-- Network device issue → `juniper_query.py` for real-time + `zabbix_query.py` for history
-- Proxmox host issue → `proxmox_query.py` for node status + `zabbix_query.py` for history
-- Backup questions → `pbs_query.py` for backup status, missing backups, sync health
-- After investigation → `zabbix_query.py acknowledge <event_id> --message "..."` to mark as handled
+- Webhook alert arrives → `python3 .../zabbix_query.py problem-details <event_id>` for context
+- Network device issue → `python3 .../juniper_query.py` for real-time + `python3 .../zabbix_query.py` for history
+- Proxmox host issue → `python3 .../proxmox_query.py` for node status + `python3 .../zabbix_query.py` for history
+- Backup questions → `python3 .../pbs_query.py` for backup status, missing backups, sync health
+- After investigation → `python3 .../zabbix_query.py acknowledge <event_id> --message "..."` to mark as handled
 
 ### Knowledge Store (ak CLI)
 ```
@@ -251,7 +251,7 @@ shell = [
     "ping *",
     "ak *",
     "infra-notify *",
-    "python3 /usr/local/share/inframon/skills/*",
+    "python3 /data/skills/*",
     "python3 *",
 ]
 network = ["*"]
