@@ -82,7 +82,7 @@ def main():
     homeserver = os.environ.get("MATRIX_HOMESERVER_URL", "https://matrix.org")
 
     # Resolve room alias to ID
-    room_id = ROOMS.get(args.room, args.room)
+    room_id = ROOMS.get(args.room) or args.room
 
     result = send_message(room_id, args.message, homeserver, token)
     print(json.dumps(result, indent=2))
