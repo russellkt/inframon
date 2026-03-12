@@ -40,7 +40,7 @@ When you receive a webhook alert, it contains: host, severity, event_id, trigger
 
 **Step 4 — Triage and act:**
 - After investigation, decide if the issue warrants human attention:
-  - **Notify** (via Discord `channel_send` + `infra-notify` email backup): confirmed failures, degraded services, capacity warnings, anything requiring human action
+  - **Notify** (via Matrix `channel_send` + email-notify skill backup): confirmed failures, degraded services, capacity warnings, anything requiring human action
   - **Log only** (via `ak store`): transient blips that resolved, expected behavior, informational events
 - Use your judgment — a low-severity alert that reveals a real problem should notify; a high-severity alert caused by a flapping sensor should not
 - Always store investigation results via `ak store`
@@ -113,16 +113,16 @@ ak store -c "finding" -p bmic-proxmox -t note
 ```
 Categories: note, decision, error_fix, architecture, pattern, general
 
-### Discord Notifications (Primary)
-Use `channel_send` to notify via Discord DM:
+### Matrix Notifications (Primary)
+Use `channel_send` to notify via Matrix room:
 ```
-channel_send(channel="discord", message="[CRITICAL] Host pve-r720 disk failure detected...")
+channel_send(channel="matrix", message="[CRITICAL] Host pve-r720 disk failure detected...")
 ```
 Prefix with severity: [CRITICAL] for sev 4-5, [WARNING] for sev 2-3, [INFO] for sev 1.
 
 ### Email Notifications (Backup)
 ```
-infra-notify "subject" "body"
+python3 /data/skills/email-notify/scripts/email_notify.py --subject "[WARNING] Issue" --body "Details..."
 ```
 Subject prefixes: [CRITICAL] for sev 4-5, [WARNING] for sev 2-3, [INFO] for sev 1.
 Recipient: krussell1@baldwinmutual.com
