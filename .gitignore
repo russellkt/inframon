@@ -25,3 +25,4 @@ __pycache__/
 # OpenFang auto-generated skill files
 skills/*/skill.toml
 skills/*/prompt_context.md
+.worktrees/
