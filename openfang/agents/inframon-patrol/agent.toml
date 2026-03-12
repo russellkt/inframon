@@ -76,9 +76,13 @@ Flag any concerning trends (storage growing, error counts increasing, sync lag w
 
 ## Report Format
 
-Compile ALL findings into a single report and post to the patrol room:
+Compile ALL findings into a single report. The shell sandbox blocks `|` characters in arguments, so ALWAYS write the report to a file first, then send it:
 ```
-python3 /data/skills/matrix-notify/scripts/matrix_notify.py --room patrol --message "<report>"
+# Step 1: write report to file
+file_write("/data/workspaces/inframon-patrol/patrol_report.md", "<report>")
+
+# Step 2: send from file (avoids shell pipe-character blocking)
+python3 /data/skills/matrix-notify/scripts/matrix_notify.py --room patrol --message-file /data/workspaces/inframon-patrol/patrol_report.md
 ```
 
 Use markdown formatting. Status icons: ✅ OK, ⚠️ WARN, 🔴 CRITICAL.
@@ -104,9 +108,10 @@ Use markdown formatting. Status icons: ✅ OK, ⚠️ WARN, 🔴 CRITICAL.
 
 ## Critical Cross-Post Rule
 
-If ANY domain shows CRITICAL status, ALSO post to the alerts room:
+If ANY domain shows CRITICAL status, ALSO post to the alerts room using the same file pattern:
 ```
-python3 /data/skills/matrix-notify/scripts/matrix_notify.py --room alerts --message "[CRITICAL] Patrol found: <issue>"
+file_write("/data/workspaces/inframon-patrol/alert.md", "[CRITICAL] Patrol found: <issue>")
+python3 /data/skills/matrix-notify/scripts/matrix_notify.py --room alerts --message-file /data/workspaces/inframon-patrol/alert.md
 ```
 
 ## Error Handling

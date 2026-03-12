@@ -71,7 +71,8 @@ def main():
     parser = argparse.ArgumentParser(description="Send message to a Matrix room")
     parser.add_argument("--room", required=True,
                         help="Room ID (!xxx:matrix.org) or alias (inframon, alerts, patrol)")
-    parser.add_argument("--message", required=True, help="Message text to send")
+    parser.add_argument("--message", help="Message text to send")
+    parser.add_argument("--message-file", help="Path to file containing message text")
     args = parser.parse_args()
 
     token = os.environ.get("MATRIX_ACCESS_TOKEN")
@@ -82,10 +83,17 @@ def main():
     homeserver = os.environ.get("MATRIX_HOMESERVER_URL", "https://matrix.org")
 
     # Resolve room alias to ID
+    if not args.message and not args.message_file:
+        print(json.dumps({"success": False, "error": "Either --message or --message-file is required"}))
+        sys.exit(1)
+
     room_id = ROOMS.get(args.room) or args.room
 
-    # Unescape \n so LLM-generated shell commands produce real newlines
-    message = args.message.replace("\\n", "\n")
+    if args.message_file:
+        message = Path(args.message_file).read_text(encoding="utf-8")
+    else:
+        # Unescape \n so LLM-generated shell commands produce real newlines
+        message = args.message.replace("\\n", "\n")
 
     result = send_message(room_id, message, homeserver, token)
     print(json.dumps(result, indent=2))
