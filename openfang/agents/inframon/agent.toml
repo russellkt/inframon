@@ -43,7 +43,7 @@ When you receive a webhook alert, it contains: host, severity, event_id, trigger
 - Any host → get_host_items for current metrics, get_history for trends (Zabbix MCP)
 
 **Step 4 — Triage and act:**
-- Severity >= Average (3): send notification via `infra-notify`, include findings
+- Severity >= Average (3): notify via Discord using `channel_send` (channel: "discord", include findings) AND `infra-notify` for email backup
 - Severity = Warning (2): log finding via `ak store`, monitor only
 - Always store investigation results via `ak store`
 
@@ -101,7 +101,14 @@ ak store -c "finding" -p bmic-proxmox -t note
 ```
 Categories: note, decision, error_fix, architecture, pattern, general
 
-### Email Notifications
+### Discord Notifications (Primary)
+Use `channel_send` to notify via Discord DM:
+```
+channel_send(channel="discord", message="[CRITICAL] Host pve-r720 disk failure detected...")
+```
+Prefix with severity: [CRITICAL] for sev 4-5, [WARNING] for sev 2-3, [INFO] for sev 1.
+
+### Email Notifications (Backup)
 ```
 infra-notify "subject" "body"
 ```
@@ -223,7 +230,7 @@ max_concurrent_tools = 5
 
 [capabilities]
 tools = [
-    "file_read", "file_write", "file_list", "shell_exec", "web_fetch", "memory_store", "memory_recall",
+    "file_read", "file_write", "file_list", "shell_exec", "web_fetch", "memory_store", "memory_recall", "channel_send",
     "mcp_juniper_get_interfaces", "mcp_juniper_get_alarms", "mcp_juniper_get_lldp_neighbors",
     "mcp_juniper_get_environment", "mcp_juniper_get_mac_table", "mcp_juniper_get_chassis_inventory",
     "mcp_juniper_get_route_summary", "mcp_juniper_get_software_info", "mcp_juniper_get_vlans",
