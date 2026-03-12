@@ -5,21 +5,20 @@ auto_approve = true
 require_approval = false
 timeout_secs = 10
 
+[channels.matrix]
+access_token_env = "MATRIX_ACCESS_TOKEN"
+default_agent = "inframon"
+homeserver_url = "https://matrix.org"
+user_id = "@inframon:matrix.org"
+
+[channels.matrix.overrides]
+output_format = "markdown"
+group_policy = "all"
+
 [channels.webhook]
 default_agent = "inframon"
 listen_port = 8460
 secret_env = "WEBHOOK_SECRET"
-
-# Telegram disabled — bot deleted after account flagged (2026-03-11)
-# [channels.telegram]
-# bot_token_env = "TELEGRAM_BOT_TOKEN"
-# default_agent = "inframon"
-# allowed_users = ["8731968499"]
-
-[channels.discord]
-bot_token_env = "DISCORD_BOT_TOKEN"
-default_agent = "inframon"
-allowed_users = ["1124442795919286332"]
 
 [compaction]
 keep_recent = 20

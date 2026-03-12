@@ -1,6 +1,6 @@
 # inframon
 
-OpenFang-based infrastructure monitoring agent for BMIC. Monitors Proxmox cluster, Juniper switches, Zabbix alerts, and PBS backup servers via Discord/webhook interface.
+OpenFang-based infrastructure monitoring agent for BMIC. Monitors Proxmox cluster, Juniper switches, Zabbix alerts, and PBS backup servers via Matrix/webhook interface.
 
 ## OpenFang Reference
 
@@ -10,7 +10,7 @@ For comprehensive OpenFang platform docs, read `openfang/docs/SUMMARY.md` — it
 
 - **Runtime:** OpenFang agent OS in Docker (`docker-compose.openfang.yml`)
 - **LLM:** Qwen 3.5 35B via OpenRouter (fallback: Gemini 2.5 Flash)
-- **Interface:** Discord bot (@bmic-inframon) + webhook gateway (port 8460)
+- **Interface:** Matrix bot (@inframon:matrix.org) + webhook gateway (port 8460)
 - **Skills:** `skills/` directory — Agent Skills standard (SKILL.md + scripts), stdlib-only Python
 - **MCP Servers:** `mcp-servers/` directory — legacy, no longer built or used (kept for reference)
 
@@ -79,6 +79,6 @@ Set in `.env`, passed through `docker-compose.openfang.yml`:
 - `ZABBIX_API_URL`, `ZABBIX_API_TOKEN` — Zabbix monitoring
 - `PVE_API_URL`, `PVE_API_TOKEN_ID`, `PVE_API_TOKEN_SECRET` — Proxmox VE
 - `JUNIPER_USER`, `JUNIPER_PASSWORD` — Switch REST API
-- `DISCORD_BOT_TOKEN` — Discord bot
+- `MATRIX_ACCESS_TOKEN` — Matrix bot
 - `WEBHOOK_SECRET` — Zabbix webhook auth
 - `PBS_INSTANCES`, `PBS_API_TOKEN_ID`, `PBS_API_TOKEN_SECRET` — PBS monitoring
