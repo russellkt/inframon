@@ -62,6 +62,9 @@ primary (10.10.1.141), ts140 (10.10.1.145), offsite (100.100.58.6)
 ### Switches
 bmic-ex3400-1 (10.10.1.10), bmic-ex2300-1 (10.10.1.9), bmic-icx6610-1 (10.10.1.254)
 
+### TrueNAS
+truenas-ts140 (10.10.1.78) — TrueNAS SCALE 25.04, pool: tank (mirror)
+
 ### Monitoring
 Zabbix server at 127.0.0.1 (in-container), web UI at 10.10.1.77
 
@@ -82,3 +85,4 @@ Set in `.env`, passed through `docker-compose.openfang.yml`:
 - `MATRIX_ACCESS_TOKEN` — Matrix bot
 - `WEBHOOK_SECRET` — Zabbix webhook auth
 - `PBS_INSTANCES`, `PBS_API_TOKEN_ID`, `PBS_API_TOKEN_SECRET` — PBS monitoring
+- `TRUENAS_URL`, `TRUENAS_API_KEY` — TrueNAS SCALE monitoring

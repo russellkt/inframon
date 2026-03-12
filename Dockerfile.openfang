@@ -6,10 +6,15 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
+    git \
     openssh-client \
     jq \
     python3 \
     && rm -rf /var/lib/apt/lists/*
+
+# Install uv for Python package management (skills with dependencies)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Install OpenFang via official install script (pre-built binary)
 RUN curl -fsSL https://openfang.sh/install | sh

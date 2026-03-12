@@ -98,11 +98,23 @@ All monitoring tools are shell scripts run via `shell_exec`. Each skill has a SK
 - missing-backups [--days N] — VMs without recent backups (cross-refs PVE)
 - All commands accept `--instance NAME` (primary, ts140, offsite) or query all
 
+**TrueNAS Monitoring** — NAS storage and health
+- `uv run --directory /data/skills/truenas-monitoring python3 scripts/truenas_query.py <command>`
+- system-info — Version, hostname, uptime, CPU
+- pools — Pool health, topology, scrub state
+- alerts [--level LEVEL] — Active alerts (CRITICAL, WARNING, INFO)
+- services [--running-only] — Services with state and enable flag
+- datasets [--pool NAME] — ZFS datasets with space usage
+- snapshots [--dataset NAME] — ZFS snapshots, optionally filtered
+- replication — Replication task status
+- disks — Physical disk info
+
 **When to use which:**
 - Webhook alert arrives → `python3 .../zabbix_query.py problem-details <event_id>` for context
 - Network device issue → `python3 .../juniper_query.py` for real-time + `python3 .../zabbix_query.py` for history
 - Proxmox host issue → `python3 .../proxmox_query.py` for node status + `python3 .../zabbix_query.py` for history
 - Backup questions → `python3 .../pbs_query.py` for backup status, missing backups, sync health
+- NAS/storage question → `uv run --directory /data/skills/truenas-monitoring python3 scripts/truenas_query.py` for pools, disks, snapshots
 - After investigation → `python3 .../zabbix_query.py acknowledge <event_id> --message "..."` to mark as handled
 
 ### Knowledge Store (ak CLI)
@@ -253,6 +265,7 @@ shell = [
     "infra-notify *",
     "python3 /data/skills/*",
     "python3 *",
+    "uv run --directory /data/skills/* python3 *",
 ]
 network = ["*"]
 memory_read = ["*"]

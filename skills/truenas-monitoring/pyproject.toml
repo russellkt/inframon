@@ -1,0 +1,8 @@
+[project]
+name = "truenas-monitoring"
+version = "0.1.0"
+description = "TrueNAS SCALE monitoring skill for OpenFang"
+requires-python = ">=3.11"
+dependencies = [
+    "truenas-api-client @ git+https://github.com/truenas/api_client.git@TS-25.04.2",
+]

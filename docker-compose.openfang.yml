@@ -37,6 +37,8 @@ services:
       - PBS_API_TOKEN_SECRET=${PBS_API_TOKEN_SECRET}
       - PBS_TS140_TOKEN_SECRET=${PBS_TS140_TOKEN_SECRET}
       - PBS_OFFSITE_TOKEN_SECRET=${PBS_OFFSITE_TOKEN_SECRET}
+      - TRUENAS_URL=${TRUENAS_URL}
+      - TRUENAS_API_KEY=${TRUENAS_API_KEY}
     volumes:
       # OpenFang config and agents
       - ./openfang/config.toml:/data/config.toml
