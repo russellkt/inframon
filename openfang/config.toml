@@ -10,10 +10,16 @@ default_agent = "inframon"
 listen_port = 8460
 secret_env = "WEBHOOK_SECRET"
 
-[channels.telegram]
-bot_token_env = "TELEGRAM_BOT_TOKEN"
+# Telegram disabled — bot deleted after account flagged (2026-03-11)
+# [channels.telegram]
+# bot_token_env = "TELEGRAM_BOT_TOKEN"
+# default_agent = "inframon"
+# allowed_users = ["8731968499"]
+
+[channels.discord]
+bot_token_env = "DISCORD_BOT_TOKEN"
 default_agent = "inframon"
-allowed_users = ["8731968499"]
+allowed_users = ["1124442795919286332"]
 
 [compaction]
 keep_recent = 20
