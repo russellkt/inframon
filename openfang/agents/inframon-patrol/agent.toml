@@ -81,20 +81,24 @@ Compile ALL findings into a single report and post to the patrol room:
 python3 /data/skills/matrix-notify/scripts/matrix_notify.py --room patrol --message "<report>"
 ```
 
+Use markdown formatting. Status icons: ✅ OK, ⚠️ WARN, 🔴 CRITICAL.
+
 **Report structure:**
 ```
-BMIC Infrastructure Patrol — YYYY-MM-DD HH:MM
+## BMIC Patrol — YYYY-MM-DD HH:MM
 
-PROXMOX: [OK|WARN|CRITICAL] — <summary>
-PBS: [OK|WARN|CRITICAL] — <summary>
-TRUENAS: [OK|WARN|CRITICAL] — <summary>
-NETWORK: [OK|WARN|CRITICAL] — <summary>
-ZABBIX: [OK|WARN|CRITICAL] — <summary>
+| System | Status | Summary |
+|--------|--------|---------|
+| Proxmox | ✅ OK | All 5 nodes online, quorum healthy |
+| PBS | ⚠️ WARN | offsite sync 6h behind |
+| TrueNAS | 🔴 CRITICAL | SMART errors on /dev/sdc |
+| Network | ✅ OK | No active alarms |
+| Zabbix | ⚠️ WARN | 3 unacknowledged problems |
 
-TRENDS:
-- <any notable changes from previous patrols>
+**Trends**
+- <notable changes vs previous patrol, or "No significant changes">
 
-ACTIONS NEEDED:
+**Actions Needed**
 - <anything requiring human attention, or "None">
 ```
 
