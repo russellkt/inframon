@@ -84,7 +84,10 @@ def main():
     # Resolve room alias to ID
     room_id = ROOMS.get(args.room) or args.room
 
-    result = send_message(room_id, args.message, homeserver, token)
+    # Unescape \n so LLM-generated shell commands produce real newlines
+    message = args.message.replace("\\n", "\n")
+
+    result = send_message(room_id, message, homeserver, token)
     print(json.dumps(result, indent=2))
 
     if not result["success"]:
