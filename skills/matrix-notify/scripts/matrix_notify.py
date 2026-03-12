@@ -31,7 +31,7 @@ if _proc_env.exists():
 # ── Matrix room ID constants ─────────────────────────────────────
 ROOMS = {
     "inframon": "!PwgTYHCRXkvXzbgqpQ:matrix.org",
-    "alerts": "!wnxZoiPfVQuSIgJVvy:matrix.org",
+    "alerts": "!wnxZoiPfVQuSlgJVvy:matrix.org",
     "patrol": "!GNBDVQhyXYYugtroNR:matrix.org",
 }
 

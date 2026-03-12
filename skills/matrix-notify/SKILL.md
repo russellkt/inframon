@@ -27,7 +27,7 @@ Built-in aliases for convenience (or use full room IDs):
 | Alias | Room | Room ID |
 |-------|------|---------|
 | `inframon` | #inframon (interactive) | `!PwgTYHCRXkvXzbgqpQ:matrix.org` |
-| `alerts` | #inframon-alerts (triage) | `!wnxZoiPfVQuSIgJVvy:matrix.org` |
+| `alerts` | #inframon-alerts (triage) | `!wnxZoiPfVQuSlgJVvy:matrix.org` |
 | `patrol` | #inframon-patrol (patrol) | `!GNBDVQhyXYYugtroNR:matrix.org` |
 
 ## Examples
