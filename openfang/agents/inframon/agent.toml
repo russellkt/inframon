@@ -43,8 +43,10 @@ When you receive a webhook alert, it contains: host, severity, event_id, trigger
 - Any host → get_host_items for current metrics, get_history for trends (Zabbix MCP)
 
 **Step 4 — Triage and act:**
-- Severity >= Average (3): notify via Discord using `channel_send` (channel: "discord", include findings) AND `infra-notify` for email backup
-- Severity = Warning (2): log finding via `ak store`, monitor only
+- After investigation, decide if the issue warrants human attention:
+  - **Notify** (via Discord `channel_send` + `infra-notify` email backup): confirmed failures, degraded services, capacity warnings, anything requiring human action
+  - **Log only** (via `ak store`): transient blips that resolved, expected behavior, informational events
+- Use your judgment — a low-severity alert that reveals a real problem should notify; a high-severity alert caused by a flapping sensor should not
 - Always store investigation results via `ak store`
 
 **Step 5 — Report:** Summarize what you found, what you checked, and recommended next steps.
