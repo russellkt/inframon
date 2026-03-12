@@ -16,7 +16,7 @@ output_format = "markdown"
 group_policy = "all"
 
 [channels.webhook]
-default_agent = "inframon"
+default_agent = "inframon-triage"
 listen_port = 8460
 secret_env = "WEBHOOK_SECRET"
 

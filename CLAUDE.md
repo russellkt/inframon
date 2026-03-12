@@ -9,6 +9,7 @@ For comprehensive OpenFang platform docs, read `openfang/docs/SUMMARY.md` — it
 ## Architecture
 
 - **Runtime:** OpenFang agent OS in Docker (`docker-compose.openfang.yml`)
+- **Agents:** Three specialized agents — `inframon` (interactive chat), `inframon-triage` (webhook alert handling), `inframon-patrol` (nightly health sweeps)
 - **LLM:** Qwen 3.5 35B via OpenRouter (fallback: Gemini 2.5 Flash)
 - **Interface:** Matrix bot (@inframon:matrix.org) + webhook gateway (port 8460)
 - **Skills:** `skills/` directory — Agent Skills standard (SKILL.md + scripts), stdlib-only Python
@@ -23,6 +24,9 @@ For comprehensive OpenFang platform docs, read `openfang/docs/SUMMARY.md` — it
 | `docker-compose.openfang.yml` | Container config, env vars, volumes, networking |
 | `Dockerfile.openfang` | Container build (no third-party deps) |
 | `skills/` | Agent Skills (juniper, zabbix, proxmox, pbs monitoring) |
+| `openfang/agents/inframon-triage/agent.toml` | Triage agent: webhook alert investigation |
+| `openfang/agents/inframon-patrol/agent.toml` | Patrol agent: nightly proactive health sweeps |
+| `skills/matrix-notify/` | Room-targeted Matrix messaging skill |
 
 ## Skill Pattern
 

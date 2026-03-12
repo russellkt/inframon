@@ -98,3 +98,13 @@ Canonical source of truth for all infrastructure hosts, IPs, and topology. Other
 | 3 | Average | Investigate, notify |
 | 4 | High | Notify immediately, investigate urgently |
 | 5 | Disaster | Notify immediately, escalate |
+
+## Matrix Rooms
+
+| Room | Alias | Room ID | Purpose |
+|------|-------|---------|---------|
+| #inframon | `inframon` | `!PwgTYHCRXkvXzbgqpQ:matrix.org` | Interactive chat |
+| #inframon-alerts | `alerts` | `!wnxZoiPfVQuSIgJVvy:matrix.org` | Alert investigations, critical findings |
+| #inframon-patrol | `patrol` | `!GNBDVQhyXYYugtroNR:matrix.org` | Nightly sweep reports |
+
+Bot account: `@inframon:matrix.org` on `matrix.org` homeserver.
