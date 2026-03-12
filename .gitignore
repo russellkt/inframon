@@ -20,3 +20,4 @@ state/
 openfang/data/
 openfang/ssh/
 openfang/google-chat-sa.json
+__pycache__/
