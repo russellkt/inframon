@@ -154,7 +154,7 @@ Recipient: krussell1@baldwinmutual.com
 | 10595 | ex3400 | 10.10.1.10 | Switch (Juniper EX3400) |
 | 10596 | pve-r720 | 10.10.1.14 | Proxmox hypervisor |
 | 10597 | pve5820gpu | 10.10.1.92 | Proxmox hypervisor |
-| 10598 | pve-r620 | 10.10.1.79 | Proxmox (retired/off) |
+| 10598 | pve-r620 | 10.10.1.79 | Proxmox hypervisor |
 
 ### Proxmox Cluster Nodes
 | Node | IP | Hardware | RAM | Access |
@@ -163,7 +163,7 @@ Recipient: krussell1@baldwinmutual.com
 | pve-p520 | 10.10.1.80 | HP P520, 8c/16t | 128 GB | REST API |
 | pve-z2 | 10.10.1.77 | HP Z2 G4, 8c/16t | 32 GB | REST API |
 | pve5820gpu | 10.10.1.92 | Workstation (GPU) | 32 GB | REST API |
-| pve-r620 | 10.10.1.79 | Dell R620, 12c/24t | 128 GB | Retired/powered off |
+| pve-r620 | 10.10.1.79 | Dell R620, 12c/24t | 128 GB | REST API |
 
 ### Network Switches
 | Switch | IP | Model | Access |
@@ -226,7 +226,6 @@ Acknowledge: zabbix_query.py acknowledge <event_id> --message "findings"
 
 ## Notification Suppression (Do NOT Notify)
 
-- pve-r620 ICMP/agent unreachable (intentionally powered off)
 - Transient CPU/RAM spikes that resolve within same check cycle
 - Duplicate alerts already notified in current cycle
 - Hosts in Zabbix maintenance mode

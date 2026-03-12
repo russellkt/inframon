@@ -21,7 +21,7 @@ Query Zabbix 7.0 API via `scripts/zabbix_query.py`.
 | 10595 | ex3400 | 10.10.1.10 | Switch (Juniper EX3400) |
 | 10596 | pve-r720 | 10.10.1.14 | Proxmox hypervisor |
 | 10597 | pve5820gpu | 10.10.1.92 | Proxmox hypervisor |
-| 10598 | pve-r620 | 10.10.1.79 | Proxmox (retired/off) |
+| 10598 | pve-r620 | 10.10.1.79 | Proxmox hypervisor |
 
 ## Commands
 

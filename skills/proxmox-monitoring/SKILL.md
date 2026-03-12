@@ -15,7 +15,7 @@ Query Proxmox VE REST API via `scripts/proxmox_query.py`.
 | pve-p520 | 10.10.1.80 | HP P520, 8c/16t | 128 GB | Active |
 | pve-z2 | 10.10.1.77 | HP Z2 G4, 8c/16t | 32 GB | Active |
 | pve5820gpu | 10.10.1.92 | Workstation (GPU) | 32 GB | Active |
-| pve-r620 | 10.10.1.79 | Dell R620, 12c/24t | 128 GB | Retired/off |
+| pve-r620 | 10.10.1.79 | Dell R620, 12c/24t | 128 GB | Active |
 
 ## Commands
 
