@@ -222,7 +222,19 @@ max_llm_tokens_per_hour = 500000
 max_concurrent_tools = 5
 
 [capabilities]
-tools = ["file_read", "file_write", "file_list", "shell_exec", "web_fetch", "memory_store", "memory_recall"]
+tools = [
+    "file_read", "file_write", "file_list", "shell_exec", "web_fetch", "memory_store", "memory_recall",
+    "mcp_juniper_get_interfaces", "mcp_juniper_get_alarms", "mcp_juniper_get_lldp_neighbors",
+    "mcp_juniper_get_environment", "mcp_juniper_get_mac_table", "mcp_juniper_get_chassis_inventory",
+    "mcp_juniper_get_route_summary", "mcp_juniper_get_software_info", "mcp_juniper_get_vlans",
+    "mcp_zabbix_get_active_problems", "mcp_zabbix_get_unacknowledged_problems", "mcp_zabbix_get_hosts",
+    "mcp_zabbix_get_host_items", "mcp_zabbix_get_history", "mcp_zabbix_get_triggers",
+    "mcp_zabbix_acknowledge_event", "mcp_zabbix_get_problem_details",
+    "mcp_proxmox_get_cluster_status", "mcp_proxmox_get_nodes", "mcp_proxmox_get_node_status",
+    "mcp_proxmox_get_vms", "mcp_proxmox_get_storage", "mcp_proxmox_get_node_disks",
+    "mcp_proxmox_get_node_networks",
+]
+workspace_paths = ["/data", "/usr/local/share/inframon"]
 shell = [
     "/usr/local/share/inframon/scripts/*",
     "ssh *",

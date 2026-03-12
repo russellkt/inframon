@@ -34,6 +34,7 @@ services:
       - PBS_API_TOKEN_ID=${PBS_API_TOKEN_ID}
       - PBS_API_TOKEN_SECRET=${PBS_API_TOKEN_SECRET}
       - PBS_TS140_TOKEN_SECRET=${PBS_TS140_TOKEN_SECRET}
+      - PBS_OFFSITE_TOKEN_SECRET=${PBS_OFFSITE_TOKEN_SECRET}
     volumes:
       # OpenFang config and agents
       - ./openfang/config.toml:/data/config.toml
@@ -46,8 +47,6 @@ services:
       # SSH key for Proxmox/switch access (dedicated key — NOT personal keys)
       - ./openfang/ssh/id_ed25519:/root/.ssh/id_ed25519:ro
       - ./openfang/ssh/id_ed25519.pub:/root/.ssh/id_ed25519.pub:ro
-    networks:
-      - bmic-infra
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:50051/api/health"]
@@ -55,10 +54,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
-
-networks:
-  bmic-infra:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 10.10.100.0/24
