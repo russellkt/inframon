@@ -27,7 +27,7 @@ echo "[setup-ak] Registering ak-maintenance workflow..."
 WORKFLOW_RESP=$(curl -sf -X POST "$BASE/api/workflows" \
     -H "Content-Type: application/json" \
     -d @openfang/workflows/ak-maintenance.json)
-WORKFLOW_ID=$(echo "$WORKFLOW_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+WORKFLOW_ID=$(echo "$WORKFLOW_RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('workflow_id') or d.get('id'))")
 echo "[setup-ak] Workflow ID: $WORKFLOW_ID"
 
 # 3. Get ak-snapshot agent ID (for cron job ownership)

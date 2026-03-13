@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 p = Path('/proc/1/environ')
 if p.exists():
-    for e in p.read_bytes().split(b'\x00'):
+    for e in p.read_bytes().split(b'\\x00'):
         if b'=' in e:
             k, v = e.decode('utf-8', errors='replace').split('=', 1)
             os.environ.setdefault(k, v)
