@@ -136,9 +136,6 @@ model = "google/gemini-2.5-flash"
 api_key_env = "OPENROUTER_API_KEY"
 base_url = "https://openrouter.ai/api/v1"
 
-[schedule]
-periodic = { cron = "0 3 * * *" }  # Nightly at 3 AM UTC
-
 [resources]
 max_llm_tokens_per_hour = 500000
 max_concurrent_tools = 5
