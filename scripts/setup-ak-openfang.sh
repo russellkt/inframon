@@ -1,7 +1,8 @@
 #!/bin/bash
 # scripts/setup-ak-openfang.sh
-# One-time registration of ak-maintenance workflow, cron, and digest trigger.
-# Run against the OpenFang daemon on VM101.
+# Register ak-maintenance workflow, cron, and digest trigger with OpenFang.
+# Run after EVERY container recreate — workflows are NOT persisted in the DB
+# across rebuilds (agents and cron/triggers are, workflows are not).
 # Usage: ./scripts/setup-ak-openfang.sh [host]
 # Default host: 10.10.1.127:4200
 
