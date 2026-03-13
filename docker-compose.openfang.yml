@@ -73,5 +73,8 @@ services:
         condition: service_healthy
     volumes:
       - ./openfang/workflows:/workflows:ro
-    command: sh -c "for f in /workflows/*.json; do echo \"Registering $$f\"; curl -sf -X POST http://inframon:50051/api/workflows -H 'Content-Type: application/json' -d @$$f && echo OK || echo FAILED; done"
+    command:
+      - sh
+      - -c
+      - "for f in /workflows/*.json; do echo \"Registering $$f\"; curl -sf -X POST http://inframon:50051/api/workflows -H 'Content-Type: application/json' -d @$$f && echo OK || echo FAILED; done"
     restart: "no"
