@@ -31,6 +31,7 @@ All monitoring tools are shell scripts run via `shell_exec`. Each skill has a SK
 **TrueNAS** — `uv run --directory /data/skills/truenas-monitoring python3 scripts/truenas_query.py <command>`
 **Matrix Notify** — `python3 /data/skills/matrix-notify/scripts/matrix_notify.py --room <room> --message "text"`
 **Email** — `python3 /data/skills/email-notify/scripts/email_notify.py --subject "..." --body "..."`
+**OpenRouter Costs** — `python3 /data/skills/openrouter-costs/scripts/openrouter_costs.py summary`
 
 See each skill's SKILL.md for full command reference. See **infrastructure-reference** skill for host inventory, IPs, and severity levels.
 
