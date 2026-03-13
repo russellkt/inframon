@@ -6,6 +6,14 @@
 #   docker compose -f docker-compose.openfang.yml logs -f
 
 services:
+  ollama-proxy:
+    image: alpine/socat
+    command: TCP-LISTEN:11434,fork,reuseaddr TCP:10.10.1.149:11434
+    network_mode: "service:inframon"
+    restart: unless-stopped
+    depends_on:
+      - inframon
+
   inframon:
     build:
       context: .

@@ -39,5 +39,3 @@ embedding_model = "text-embedding-3-small"
 [network]
 listen_addr = "0.0.0.0:50051"
 
-[providers.ollama]
-base_url = "http://10.10.1.149:11434"
