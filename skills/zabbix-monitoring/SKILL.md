@@ -18,8 +18,8 @@ hosts                                                           # All monitored 
 host-items <host> [--search TEXT] [--limit N]                  # Monitored metrics for a host
 history <itemid> [--type N] [--limit N]                        # Historical values for a metric
 triggers <host> [--active-only]                                # Alert conditions for a host
-acknowledge <event_id> --message TEXT                          # Mark problem as investigated
-problem-details <event_id>                                     # Full context for a specific event
+acknowledge --event-id <id> --message TEXT                     # Mark problem as investigated
+problem-details --event-id <id>                                # Full context for a specific event
 ```
 
 ## Investigation Patterns
@@ -32,7 +32,7 @@ problem-details <event_id>                                     # Full context fo
 
 **"Show me the trend"** -> `host-items <host> --search cpu` to find the itemid, then `history <itemid> --limit 50` for values.
 
-**After investigation** -> `acknowledge <event_id> --message "Investigated: ..."` to mark as handled.
+**After investigation** -> `acknowledge --event-id <id> --message "Investigated: ..."` to mark as handled.
 
 ## History Types
 

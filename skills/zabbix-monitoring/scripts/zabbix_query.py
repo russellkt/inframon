@@ -172,9 +172,6 @@ def cmd_triggers(args):
 
 
 def cmd_acknowledge(args):
-    if not args.message:
-        print("ERROR: --message is required for acknowledge", file=sys.stderr)
-        sys.exit(1)
     return zabbix_rpc("event.acknowledge", {
         "eventids": [args.event_id],
         "action": 6,
@@ -222,11 +219,11 @@ def main():
     p_trig.add_argument("--active-only", action="store_true", help="Only show firing triggers")
 
     p_ack = sub.add_parser("acknowledge", help="Mark problem as investigated")
-    p_ack.add_argument("event_id", help="Zabbix event ID")
+    p_ack.add_argument("--event-id", required=True, dest="event_id", help="Zabbix event ID")
     p_ack.add_argument("--message", required=True, help="Investigation summary")
 
     p_detail = sub.add_parser("problem-details", help="Full context for a specific event")
-    p_detail.add_argument("event_id", help="Zabbix event ID")
+    p_detail.add_argument("--event-id", required=True, dest="event_id", help="Zabbix event ID")
 
     args = parser.parse_args()
 
