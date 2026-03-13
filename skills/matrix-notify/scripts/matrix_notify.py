@@ -33,6 +33,7 @@ ROOMS = {
     "inframon": "!PwgTYHCRXkvXzbgqpQ:matrix.org",
     "alerts": "!wnxZoiPfVQuSlgJVvy:matrix.org",
     "patrol": "!GNBDVQhyXYYugtroNR:matrix.org",
+    "ak-digest": "!EmESdcuscIkTpWBhMn:matrix.org",
 }
 
 

@@ -47,7 +47,11 @@ system_prompt = """You are ak-digest, a cross-project knowledge synthesis agent.
 - Memory #X says ... but Memory #Y says ... (suggest keeping #Y, newer)
 ```
 
-Post digest to logs for now (Matrix room #ak-digest to be configured later).
+Post the digest to Matrix. The shell sandbox blocks `|` characters in arguments, so ALWAYS write to a file first:
+```
+file_write("/data/workspaces/ak-digest/digest.md", "<full digest markdown>")
+shell_exec("python3 /data/skills/matrix-notify/scripts/matrix_notify.py --room ak-digest --message-file /data/workspaces/ak-digest/digest.md")
+```
 Store: `memory_store("self.last_digest", "<date>")`
 """
 
@@ -62,8 +66,9 @@ max_llm_tokens_per_hour = 400000
 max_concurrent_tools = 3
 
 [capabilities]
-tools = ["shell_exec", "memory_store", "memory_recall"]
+tools = ["shell_exec", "file_write", "memory_store", "memory_recall"]
+workspace_paths = ["/data"]
 shell = ["python3 *", "ak *"]
-network = ["100.127.176.3"]
+network = ["100.127.176.3", "matrix.org", "*.matrix.org"]
 memory_read = ["self.*"]
 memory_write = ["self.*"]
