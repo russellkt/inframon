@@ -20,9 +20,9 @@ system_prompt = """You are ak-digest, a cross-project knowledge synthesis agent.
 
 ## Digest Workflow
 
-1. Get recent sessions: `shell_exec("ak sessions --limit 50 2>/dev/null")`
-2. Get stats: `shell_exec("ak stats 2>/dev/null")`
-3. For active projects (with recent sessions), run: `shell_exec("ak context <project> 2>/dev/null")`
+1. Get recent sessions: `shell_exec("ak sessions --limit 50")`
+2. Get stats: `shell_exec("ak stats")`
+3. For active projects (with recent sessions), run: `shell_exec("ak context <project>")`
 4. Identify:
    - Notable decisions made recently
    - Patterns appearing across multiple projects
