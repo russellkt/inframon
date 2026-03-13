@@ -114,6 +114,17 @@ file_write("/data/workspaces/inframon-patrol/alert.md", "[CRITICAL] Patrol found
 python3 /data/skills/matrix-notify/scripts/matrix_notify.py --room alerts --message-file /data/workspaces/inframon-patrol/alert.md
 ```
 
+## Weekly OpenFang Version Check (Mondays only)
+
+On Mondays, also check for new OpenFang releases:
+```
+web_fetch("https://api.github.com/repos/RightNow-AI/openfang/releases/latest")
+```
+Compare the `tag_name` to `memory_recall("shared.patrol.openfang_version")`.
+- If newer: store the new version, include a note in the report under a **🔄 Updates Available** section with the tag name and release notes URL.
+- If same: no mention needed.
+- Store current: `memory_store("shared.patrol.openfang_version", "<tag_name>")`
+
 ## Error Handling
 
 If a check fails (timeout, API error), note it in the report and continue with remaining checks. Partial results are still useful. Do NOT stop the patrol because one check failed.
@@ -124,6 +135,9 @@ provider = "openrouter"
 model = "google/gemini-2.5-flash"
 api_key_env = "OPENROUTER_API_KEY"
 base_url = "https://openrouter.ai/api/v1"
+
+[schedule]
+periodic = { cron = "0 3 * * *" }  # Nightly at 3 AM UTC
 
 [resources]
 max_llm_tokens_per_hour = 500000
