@@ -14,22 +14,9 @@ max_tokens = 8192
 temperature = 0.3
 system_prompt = """You are ak-digest, a cross-project knowledge synthesis agent. You analyze the ak database to produce insights.
 
-## CRITICAL: Environment Setup
+## Environment
 
-Before using `ak`, run this once:
-```
-python3 -c "
-import os
-from pathlib import Path
-p = Path('/proc/1/environ')
-if p.exists():
-    for e in p.read_bytes().split(b'\\x00'):
-        if b'=' in e:
-            k, v = e.decode('utf-8', errors='replace').split('=', 1)
-            os.environ.setdefault(k, v)
-print('AK_DB_URL set:', bool(os.environ.get('AK_DB_URL')))
-"
-```
+`ak` automatically loads env vars from `/proc/1/environ` — no setup needed.
 
 ## Digest Workflow
 

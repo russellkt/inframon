@@ -23,7 +23,10 @@ RUN curl -fsSL https://openfang.sh/install | sh
 ENV PATH="/root/.openfang/bin:${PATH}"
 
 # Install ak knowledge CLI (pre-built linux/amd64 binary — private repo)
-COPY bin/ak /usr/local/bin/ak
+# ak-bin is the real binary; ak is a Python wrapper that loads /proc/1/environ first
+# (OpenFang strips env vars from shell_exec subprocesses)
+COPY bin/ak /usr/local/bin/ak-bin
+COPY bin/ak-wrapper /usr/local/bin/ak
 
 # Download built-in agent templates for reference
 RUN mkdir -p /opt/openfang \
