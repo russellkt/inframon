@@ -35,7 +35,7 @@ Issues discovered in production use. File at https://github.com/RightNow-AI/open
 ### Workflows should persist across restarts (load from directory on startup)
 **Discovered:** 2026-03-13
 **Symptom:** Workflows are pure in-memory (`Arc<RwLock<HashMap>>`). Every container restart loses all workflow definitions. Cron jobs correctly persist in SQLite — workflows should too, or OpenFang should load `*.json` files from a configured workflows directory on startup.
-**Workaround:** `workflow-init` sidecar service in docker-compose that re-POSTs all workflow JSON files after healthcheck passes.
+**Workaround:** `workflow-init` sidecar service in docker-compose that re-POSTs all workflow JSON files after healthcheck passes. Note: if you also register a workflow manually before the sidecar runs, you'll get duplicates — the sidecar doesn't check for existing registrations before POSTing.
 **Fix needed:** Either persist workflows in SQLite alongside crons, or auto-load from `$OPENFANG_HOME/workflows/` on daemon start.
 
 ---
