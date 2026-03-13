@@ -34,7 +34,8 @@ provider = "openrouter"
 
 [memory]
 decay_rate = 0.05
-embedding_model = "text-embedding-3-small"
+embedding_model = "bge-m3"
+embedding_provider = "ollama"
 
 [network]
 listen_addr = "0.0.0.0:50051"
