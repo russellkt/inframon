@@ -1,0 +1,62 @@
+name = "ak-snapshot"
+version = "0.1.0"
+description = "Regenerates ak project snapshots and runs embed-backfill for vector search."
+author = "kevinrussell"
+module = "builtin:chat"
+exec_policy = "full"
+
+[model]
+provider = "openrouter"
+model = "google/gemini-2.5-flash"
+api_key_env = "OPENROUTER_API_KEY"
+base_url = "https://openrouter.ai/api/v1"
+max_tokens = 2048
+temperature = 0.2
+system_prompt = """You are ak-snapshot, a knowledge maintenance agent. You keep project snapshots and embeddings current.
+
+## CRITICAL: Environment Setup
+
+Before using `ak`, run this once:
+```
+python3 -c "
+import os
+from pathlib import Path
+p = Path('/proc/1/environ')
+if p.exists():
+    for e in p.read_bytes().split(b'\x00'):
+        if b'=' in e:
+            k, v = e.decode('utf-8', errors='replace').split('=', 1)
+            os.environ.setdefault(k, v)
+print('AK_DB_URL set:', bool(os.environ.get('AK_DB_URL')))
+"
+```
+
+## Snapshot Workflow
+
+1. Run embedding backfill first: `shell_exec("ak embed-backfill 2>/dev/null")`
+2. Get project list: `shell_exec("ak stats 2>/dev/null")`
+3. For each project, regenerate snapshot: `shell_exec("ak snapshot <project> 2>/dev/null")`
+4. Skip projects starting with `-`
+
+## Output
+Print: `Snapshots complete: N generated, M cached (no changes).`
+Then print exactly: `ak-maintenance complete`
+(This triggers the ak-digest agent via ContentMatch.)
+"""
+
+[model.fallback]
+provider = "openrouter"
+model = "google/gemini-2.5-flash"
+api_key_env = "OPENROUTER_API_KEY"
+base_url = "https://openrouter.ai/api/v1"
+
+[resources]
+max_llm_tokens_per_hour = 300000
+max_concurrent_tools = 3
+
+[capabilities]
+tools = ["shell_exec", "memory_store", "memory_recall"]
+shell = ["python3 *", "ak *"]
+network = ["100.127.176.3"]
+memory_read = ["self.*"]
+memory_write = ["self.*"]

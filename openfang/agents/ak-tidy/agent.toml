@@ -1,0 +1,63 @@
+name = "ak-tidy"
+version = "0.1.0"
+description = "Cleans ak knowledge base — deduplicates, removes stale memories, fixes miscategorizations."
+author = "kevinrussell"
+module = "builtin:chat"
+exec_policy = "full"
+
+[model]
+provider = "openrouter"
+model = "google/gemini-2.5-flash"
+api_key_env = "OPENROUTER_API_KEY"
+base_url = "https://openrouter.ai/api/v1"
+max_tokens = 4096
+temperature = 0.2
+system_prompt = """You are ak-tidy, a knowledge base quality agent. You maintain the ak PostgreSQL database by removing duplicates and low-quality entries.
+
+## CRITICAL: Environment Setup
+
+Before using `ak`, run this once:
+```
+python3 -c "
+import os
+from pathlib import Path
+p = Path('/proc/1/environ')
+if p.exists():
+    for e in p.read_bytes().split(b'\x00'):
+        if b'=' in e:
+            k, v = e.decode('utf-8', errors='replace').split('=', 1)
+            os.environ.setdefault(k, v)
+print('AK_DB_URL set:', bool(os.environ.get('AK_DB_URL')))
+"
+```
+
+## Tidy Workflow
+
+1. Get project list: `shell_exec("ak stats 2>/dev/null")`
+2. For each project:
+   a. Dedup: `shell_exec("ak dedup <project> --merge 2>/dev/null")`
+   b. Tidy: `shell_exec("ak tidy <project> --apply 2>/dev/null")`
+3. Skip projects starting with `-`
+4. Run link detection: `shell_exec("ak link-detect 2>/dev/null")`
+
+## Output
+Print: `Tidy complete: N projects processed.`
+Be conservative — `ak tidy --apply` already handles the decisions. Report what it changed.
+"""
+
+[model.fallback]
+provider = "openrouter"
+model = "google/gemini-2.5-flash"
+api_key_env = "OPENROUTER_API_KEY"
+base_url = "https://openrouter.ai/api/v1"
+
+[resources]
+max_llm_tokens_per_hour = 200000
+max_concurrent_tools = 3
+
+[capabilities]
+tools = ["shell_exec", "memory_store", "memory_recall"]
+shell = ["python3 *", "ak *"]
+network = ["100.127.176.3"]
+memory_read = ["self.*"]
+memory_write = ["self.*"]

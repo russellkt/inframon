@@ -40,6 +40,10 @@ services:
       - PBS_OFFSITE_TOKEN_SECRET=${PBS_OFFSITE_TOKEN_SECRET}
       - TRUENAS_URL=${TRUENAS_URL}
       - TRUENAS_API_KEY=${TRUENAS_API_KEY}
+      - AK_DB_URL=${AK_DB_URL}
+      - AK_LLM_URL=${AK_LLM_URL}
+      - AK_LLM_MODEL=${AK_LLM_MODEL}
+      - AK_LLM_API_KEY=${OPENROUTER_API_KEY}
     volumes:
       # OpenFang config and agents
       - ./openfang/config.toml:/data/config.toml
