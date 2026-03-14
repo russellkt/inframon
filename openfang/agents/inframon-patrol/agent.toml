@@ -48,7 +48,18 @@ uv run --directory /data/skills/truenas-monitoring python3 scripts/truenas_query
 uv run --directory /data/skills/truenas-monitoring python3 scripts/truenas_query.py disks
 uv run --directory /data/skills/truenas-monitoring python3 scripts/truenas_query.py replication
 ```
-Check: Pool health? SMART errors increasing? Active alerts? Replication current?
+Check: Pool health? Active alerts? Replication current?
+
+**SMART error handling — baseline comparison required:**
+For each disk with SMART errors, retrieve the stored baseline:
+`memory_recall("shared.patrol.baseline.truenas.smart.<diskname>")` (e.g. `shared.patrol.baseline.truenas.smart.sdc`)
+
+- If count **increased** vs baseline → 🔴 CRITICAL, cross-post to alerts
+- If count **same or not stored yet** → ⚠️ WARN in report only, do NOT cross-post
+- If count **decreased** → ✅ note the improvement
+
+Always store the current count as the new baseline after checking:
+`memory_store("shared.patrol.baseline.truenas.smart.<diskname>", "<count>")`
 
 ### 4. Network Switches
 ```
@@ -68,11 +79,28 @@ Check: Unacknowledged problems lingering? Any active issues that were missed?
 
 ## Trend Tracking
 
-After gathering data, compare with previous patrol findings:
-- `memory_recall("shared.patrol.*")` — previous results
-- Store current findings: `memory_store("shared.patrol.<domain>.<metric>", "YYYY-MM-DD: value")`
+After gathering data, store numeric baselines for comparison on next run:
+- `memory_store("shared.patrol.baseline.<domain>.<metric>", "<numeric_value>")`
 
-Flag any concerning trends (storage growing, error counts increasing, sync lag worsening).
+Examples: `shared.patrol.baseline.truenas.smart.sdc`, `shared.patrol.baseline.proxmox.storage.local_pct`
+
+Flag trends only when a value has **changed** vs its stored baseline. A metric that is stable — even if non-zero — is not a trend worth reporting.
+
+## Operator Suppressions
+
+Before cross-posting anything to alerts, check for operator-set suppressions:
+`memory_recall("shared.patrol.suppress.*")`
+
+Suppression format (written by the inframon agent on operator request):
+`"threshold=<N>, reason=<text>, date=<YYYY-MM-DD>"`
+
+If a suppression exists for an issue AND the current value is <= threshold:
+- Show it in the patrol report as ⚠️ KNOWN (not CRITICAL) with the suppression reason
+- Do **not** cross-post to alerts
+- Do **not** treat it as a trend
+
+Example suppression keys:
+- `shared.patrol.suppress.truenas.smart.sdc` — suppress /dev/sdc SMART error alerts
 
 ## Report Format
 
