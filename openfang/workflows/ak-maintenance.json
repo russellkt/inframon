@@ -5,7 +5,7 @@
     {
       "name": "embed-backfill-and-tidy",
       "agent": {"name": "ak-tidy"},
-      "prompt": "Run full tidy pipeline: embed-backfill, dedup all projects, tidy all projects, link-detect.",
+      "prompt_template":"Run full tidy pipeline: embed-backfill, dedup all projects, tidy all projects, link-detect.",
       "mode": "sequential",
       "timeout_secs": 600,
       "error_mode": "skip"
@@ -13,7 +13,7 @@
     {
       "name": "enrich",
       "agent": {"name": "ak-enrich"},
-      "prompt": "Run enrichment on all projects. Fix miscategorized memories.",
+      "prompt_template":"Run enrichment on all projects. Fix miscategorized memories.",
       "mode": "sequential",
       "timeout_secs": 600,
       "error_mode": "skip"
@@ -21,7 +21,7 @@
     {
       "name": "snapshot",
       "agent": {"name": "ak-snapshot"},
-      "prompt": "Run embed-backfill and regenerate all project snapshots. End your output with 'ak-maintenance complete'.",
+      "prompt_template":"Run embed-backfill and regenerate all project snapshots. End your output with 'ak-maintenance complete'.",
       "mode": "sequential",
       "timeout_secs": 600,
       "error_mode": "skip"
