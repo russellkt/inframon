@@ -47,5 +47,8 @@ ENV OPENFANG_HOME=/data
 
 EXPOSE 4200 8460
 
-ENTRYPOINT ["openfang"]
-CMD ["start"]
+# Entrypoint: validates/refreshes Matrix token before starting OpenFang
+COPY openfang/scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
