@@ -53,6 +53,7 @@ services:
       - ./skills:/data/skills
       # Persistent data (SQLite DB, memory, sessions)
       - ./openfang/data:/data/data
+      - ./openfang/workflows:/data/workflows:ro
       # SSH key for Proxmox/switch access (dedicated key — NOT personal keys)
       - ./openfang/ssh/id_ed25519:/root/.ssh/id_ed25519:ro
       - ./openfang/ssh/id_ed25519.pub:/root/.ssh/id_ed25519.pub:ro
@@ -64,17 +65,3 @@ services:
       retries: 3
       start_period: 15s
 
-  # Registers ephemeral workflows after OpenFang is healthy.
-  # Workflows are in-memory only and lost on container restart.
-  workflow-init:
-    image: curlimages/curl:latest
-    depends_on:
-      inframon:
-        condition: service_healthy
-    volumes:
-      - ./openfang/workflows:/workflows:ro
-    command:
-      - sh
-      - -c
-      - "for f in /workflows/*.json; do echo \"Registering $$f\"; curl -sf -X POST http://inframon:50051/api/workflows -H 'Content-Type: application/json' -d @$$f && echo OK || echo FAILED; done"
-    restart: "no"

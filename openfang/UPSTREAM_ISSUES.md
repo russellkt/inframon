@@ -32,11 +32,10 @@ Issues discovered in production use. File at https://github.com/RightNow-AI/open
 
 ## Feature Requests
 
-### Workflows should persist across restarts (load from directory on startup)
-**Discovered:** 2026-03-13
-**Symptom:** Workflows are pure in-memory (`Arc<RwLock<HashMap>>`). Every container restart loses all workflow definitions. Cron jobs correctly persist in SQLite — workflows should too, or OpenFang should load `*.json` files from a configured workflows directory on startup.
-**Workaround:** `workflow-init` sidecar service in docker-compose that re-POSTs all workflow JSON files after healthcheck passes. Note: if you also register a workflow manually before the sidecar runs, you'll get duplicates — the sidecar doesn't check for existing registrations before POSTing.
-**Fix needed:** Either persist workflows in SQLite alongside crons, or auto-load from `$OPENFANG_HOME/workflows/` on daemon start.
+### ~~Workflows should persist across restarts~~ ✅ FIXED (upstream #486, available in v0.4.0)
+**Was:** Workflows lost on every container restart.
+**Fix:** Add `workflows_dir = "/data/workflows"` to `config.toml`. OpenFang auto-scans and registers all `.json` files in that directory on startup. Invalid files are skipped with a warning.
+**Our config:** `workflows_dir = "/data/workflows"`, volume-mounted from `./openfang/workflows`. Sidecar removed.
 
 ---
 
@@ -48,11 +47,12 @@ Issues discovered in production use. File at https://github.com/RightNow-AI/open
 
 ---
 
-### Killing an agent silently deletes its cron jobs
-**Discovered:** 2026-03-13
-**Symptom:** `openfang agent kill <id>` removes the agent's cron jobs from SQLite with no warning. Agent IDs also change on respawn, so any cron, memory, or external reference tied to the old ID breaks silently. We lost `inframon-patrol-daily` and had to manually recreate it after respawning the patrol agent to reload a config change.
-**Workaround:** After any `agent kill` + `agent spawn`, run `openfang cron list` and manually recreate any missing crons with the new agent ID. Also re-seed any memories that were keyed to the old agent ID.
-**Fix needed:** Crons should either (a) survive agent kill/respawn and be re-associated by agent name, or (b) `agent kill` should warn that N cron jobs will be deleted and require confirmation.
+### Killing an agent deletes its cron jobs — no reassign by name
+**Discovered:** 2026-03-13 | **Upstream:** #504, #461 (closed — partial fix)
+**Symptom:** `openfang agent kill <id>` deletes associated cron jobs. Agent IDs change on respawn, so crons, memories, and external references to the old ID break silently.
+**What upstream fixed:** `kill_agent()` now calls `remove_agent_jobs()` cleanly (no orphan cron entries). The internal `reassign_agent_jobs()` exists in `cron.rs` but is not exposed publicly.
+**Still needed:** Public `openfang cron reassign <old-id> <new-id>` command, or cron reassignment keyed by agent *name* rather than UUID on respawn.
+**Workaround:** After any `agent kill` + `agent spawn`, run `openfang cron list` and manually recreate missing crons with the new agent ID. Also re-seed memories keyed to the old agent ID.
 
 ---
 
