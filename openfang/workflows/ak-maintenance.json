@@ -4,7 +4,7 @@
   "steps": [
     {
       "name": "embed-backfill-and-tidy",
-      "agent_name": "ak-tidy",
+      "agent": "ak-tidy",
       "prompt": "Run full tidy pipeline: embed-backfill, dedup all projects, tidy all projects, link-detect.",
       "mode": "sequential",
       "timeout_secs": 600,
@@ -12,7 +12,7 @@
     },
     {
       "name": "enrich",
-      "agent_name": "ak-enrich",
+      "agent": "ak-enrich",
       "prompt": "Run enrichment on all projects. Fix miscategorized memories.",
       "mode": "sequential",
       "timeout_secs": 600,
@@ -20,7 +20,7 @@
     },
     {
       "name": "snapshot",
-      "agent_name": "ak-snapshot",
+      "agent": "ak-snapshot",
       "prompt": "Run embed-backfill and regenerate all project snapshots. End your output with 'ak-maintenance complete'.",
       "mode": "sequential",
       "timeout_secs": 600,
