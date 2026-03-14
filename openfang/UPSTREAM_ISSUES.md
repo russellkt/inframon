@@ -48,6 +48,14 @@ Issues discovered in production use. File at https://github.com/RightNow-AI/open
 
 ---
 
+### Killing an agent silently deletes its cron jobs
+**Discovered:** 2026-03-13
+**Symptom:** `openfang agent kill <id>` removes the agent's cron jobs from SQLite with no warning. Agent IDs also change on respawn, so any cron, memory, or external reference tied to the old ID breaks silently. We lost `inframon-patrol-daily` and had to manually recreate it after respawning the patrol agent to reload a config change.
+**Workaround:** After any `agent kill` + `agent spawn`, run `openfang cron list` and manually recreate any missing crons with the new agent ID. Also re-seed any memories that were keyed to the old agent ID.
+**Fix needed:** Crons should either (a) survive agent kill/respawn and be re-associated by agent name, or (b) `agent kill` should warn that N cron jobs will be deleted and require confirmation.
+
+---
+
 ### `GET /api/metrics` lacks useful observability data
 **Discovered:** ~2026-03-13
 **Symptom:** Prometheus endpoint only exposes basic counters (uptime, agent count, token totals, tool calls, panics, restarts). No latency histograms, per-request error rates, or cost breakdown by agent.
