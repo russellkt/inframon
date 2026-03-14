@@ -1,6 +1,7 @@
 {
   "id": "6ac3b03e-8b90-4fd7-829a-ce49a48ada29",
   "name": "ak-maintenance",
+  "created_at": "2026-03-13T00:00:00Z",
   "description": "Full ak knowledge base maintenance pipeline: embed-backfill, dedup, tidy, enrich, snapshot, link-detect. Runs every 3h. Final step triggers ak-digest via ContentMatch.",
   "steps": [
     {
